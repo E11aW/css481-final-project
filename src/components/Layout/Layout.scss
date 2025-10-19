@@ -1,8 +1,10 @@
 @import '../../variables.scss';
 
-.layout{
+.layout {
+
     // Styles are nested here:
     .main-content-container {
+        background-color: $OffWhite;
         padding-top: 7rem;
         width: 100%;
     }

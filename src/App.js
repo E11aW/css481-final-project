@@ -10,14 +10,14 @@ import { Homepage } from './pages/homepage/home';
 function App() {
   return (
     <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Layout />} >
-            <Route index element={<Homepage />} />
-            <Route path="/about-us" element={<AboutUs />} />
-            <Route path="/data" element={<Data />} />
-            <Route path="/game" element={<Game />} />
-          </Route>
-        </Routes>
+      <Routes>
+        <Route path="/" element={<Layout />} >
+          <Route index element={<Homepage />} />
+          <Route path="/about-us" element={<AboutUs />} />
+          <Route path="/data" element={<Data />} />
+          <Route path="/game" element={<Game />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

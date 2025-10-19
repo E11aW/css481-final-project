@@ -1,0 +1,46 @@
+@import '../../variables.scss';
+
+.navbar {
+    background-color: $DeepBlue;
+    padding: 1rem 3rem;
+    width: 100%;
+    box-shadow: 0 2px 4px $SteelGray;
+    // Keep navbar on top
+    position: fixed;
+    z-index: 10;
+
+    .max-width {
+        width: 100%;
+    }
+
+    .navbar-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 5rem;
+        width: 100%;
+    }
+
+    .navbar-links {
+        .link-list {
+            display: flex;
+            gap: 5rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+    }
+
+    .nav-link {
+        color: $OffWhite;
+        text-decoration: none;
+        font-family: $font-heading;
+        font-size: 2rem;
+
+        &:active,
+        &:hover {
+            text-decoration: underline;
+            color: $White;
+        }
+    }
+}

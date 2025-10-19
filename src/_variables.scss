@@ -19,7 +19,6 @@ $Black: #000000;
     position: relative;
     padding: 0;
     margin: 0;
-    background-color: $OffWhite;
 }
 
 p {
@@ -27,9 +26,12 @@ p {
     font-size: 1.5rem;
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
     font-family: $font-heading;
 }
+
 h1 {
     font-size: 3rem;
 }
