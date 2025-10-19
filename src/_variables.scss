@@ -1,14 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Overpass:wght@300;400;600;700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Varela+Round&display=swap');
 // Fonts
-$font-heading: 'Barlow Condensed', sans-serif;
-$font-body: 'Overpass', sans-serif;
+$font-heading: 'Chakra Petch', sans-serif;
+$font-body: 'Valera Round', sans-serif;
 
 // Colors
-$TrickFireGreen: #00FE00;
-$AccentPink: #E93CAC;
-$EerieBlack: #222222;
-$DarkWhite: #CCCCCC;
+$OffWhite: #F0EDF3;
+$DeepBlue: #5C84B6;
+$SteelGray: #CAD5E4;
+$SunsetOrange: #F7C6B0;
+$MutedOrange: #D9BDBD;
+// Basic Colors if needed
 $White: #FFFFFF;
 $Black: #000000;
 
@@ -18,14 +19,17 @@ $Black: #000000;
     position: relative;
     padding: 0;
     margin: 0;
+    background-color: $OffWhite;
 }
 
 p {
     font-family: $font-body;
+    font-size: 1.5rem;
 }
 
 h1, h2, h3 {
     font-family: $font-heading;
-    text-transform: uppercase;
-    font-weight: 600;
+}
+h1 {
+    font-size: 3rem;
 }
