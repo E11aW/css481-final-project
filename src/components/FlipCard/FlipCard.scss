@@ -2,8 +2,8 @@
 
 .flip-card {
     background-color: transparent;
-    width: 300px;
-    height: 400px;
+    width: 380px;
+    height: 500px;
     perspective: 1000px;
     cursor: pointer;
 
@@ -38,8 +38,8 @@
         background-color: $DeepBlue;
 
         .card-image {
-            width: 80px;
-            height: 80px;
+            width: 300px;
+            height: 300px;
             border-radius: 50%;
             margin-bottom: 1rem;
         }
