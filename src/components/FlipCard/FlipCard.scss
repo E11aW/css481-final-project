@@ -6,6 +6,7 @@
     height: 500px;
     perspective: 1000px;
     cursor: pointer;
+    padding: 2rem;
 
     .flip-card-inner {
         position: relative;
@@ -38,10 +39,10 @@
         background-color: $DeepBlue;
 
         .card-image {
-            width: 300px;
-            height: 300px;
-            border-radius: 50%;
-            margin-bottom: 1rem;
+            width: 250px;
+            height: 250px;
+            border-radius: 5%;
+            margin-bottom: 2rem;
         }
 
         .card-name {
@@ -54,6 +55,11 @@
     .back {
         background-color: $DeepBlue;
         transform: rotateY(180deg);
+        text-align: left;
+        padding: 2rem;
+
+        justify-content: flex-start;
+        align-items: flex-start;
 
         .back-description {
             color: $SteelGray;

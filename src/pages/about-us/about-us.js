@@ -1,7 +1,7 @@
 import './about-us.scss';
 import { MaxWidth } from '../../components/MaxWidth/MaxWidth';
-import { FlipCard } from '../../components/FlipCard/FlipCard';
 import { CardGrid } from '../../components/CardGrid/CardGrid';
+import EllaImage from '../../assets/AboutUs/Ella-Williams.jpg';
 
 export const AboutUs = () => {
   return (
@@ -10,10 +10,10 @@ export const AboutUs = () => {
         <h1>About Us</h1>
         <CardGrid
           members={[
-            { image: '/images/team/member1.jpg', name: 'Alice Johnson', description: 'Lead Developer with a passion for creating intuitive user experiences.' },
-            { image: '/images/team/member2.jpg', name: 'Bob Smith', description: 'Backend Engineer specializing in scalable server-side applications.' },
-            { image: '/images/team/member3.jpg', name: 'Catherine Lee', description: 'UI/UX Designer focused on crafting visually appealing designs.' },
-            { image: '/images/team/member4.jpg', name: 'David Kim', description: 'Full Stack Developer with expertise in both frontend and backend technologies.' },
+            { image: '/images/team/member3.jpg', name: 'Clayton McArthur', description: 'Send me your description.' },
+            { image: EllaImage, name: 'Ella Williams', description: 'I am an undergraduate student at the University of Washington Bothell working towards a Bachelor of Science in Computer Science and Software Engineering. I work on campus and am a very active member of our campus\'s robotics team: TrickFire Robotics. I am well-versed in a wide variety of programming languages, including both frontend and backend.' },
+            { image: '/images/team/member3.jpg', name: 'Ishaan Shete', description: 'Send me your description.' },
+            { image: '/images/team/member4.jpg', name: 'Maxx McArthur', description: 'Send me your description.' },
           ]}
         />
 
