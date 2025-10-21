@@ -8,6 +8,8 @@ export const AboutUs = () => {
     <main className="about-us">
       <MaxWidth>
         <h1>About Us</h1>
+        <h2>Our Mission</h2>
+        <p className='mission-paragraph'>Example mission paragrah here.</p>
         <CardGrid
           subheader='Our Team'
           members={[
