@@ -33,5 +33,13 @@ h3 {
 }
 
 h1 {
-    font-size: 3rem;
+    font-size: 5rem;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+h2 {
+    font-size: 3.5rem;
+    color: $DeepBlue;
+    padding-left: 3rem;
 }

@@ -21,7 +21,7 @@ export const FlipCard = (props) => {
             <div className="flip-card-inner">
                 <div className="front">
                     <img src={props.imageSrc} alt={props.name} className="card-image" />
-                    <h2 className='card-name'>{props.name}</h2>
+                    <h3 className='card-name'>{props.name}</h3>
                 </div>
                 <div className='back'>
                     <p className='back-description'>{props.backDescription}</p>

@@ -4,22 +4,26 @@ import { FlipCard } from '../FlipCard/FlipCard';
 /**
  * CardGrid component that arranges its children flipcards in a responsive grid layout.
  * @component
- * @param {string[]} props.members - The FlipCard components to be displayed in the grid.
+ * @param {Objects[]} props.members - The FlipCard components to be displayed in the grid.
+ * @param {String} props.subheader - The subheader name for this card grid.
  * @returns {JSX.Element}
  */
 
 export const CardGrid = (props) => {
     const displayedMembers = props.members;
     return (
-        <div className='card-grid'>
-            {displayedMembers.map((member, index) => (
-                <FlipCard
-                    key={index}
-                    name={member.name}
-                    imageSrc={member.image}
-                    backDescription={member.description}
-                />
-            ))}
+        <div className='card-section'>
+            <h2 className='subheader'>{props.subheader}</h2>
+            <div className='card-grid'>
+                {displayedMembers.map((member, index) => (
+                    <FlipCard
+                        key={index}
+                        name={member.name}
+                        imageSrc={member.image}
+                        backDescription={member.description}
+                    />
+                ))}
+            </div>
         </div>
     )
 }
