@@ -11,7 +11,7 @@ $SunsetOrange: #F7C6B0;
 $MutedOrange: #D9BDBD;
 // Basic Colors if needed
 $White: #FFFFFF;
-$Black: #000000;
+$Brown: #907c7cff;
 
 // Default Stylings
 * {
@@ -36,6 +36,8 @@ h1 {
     font-size: 5rem;
     text-transform: uppercase;
     text-align: center;
+    color: $Brown;
+    padding-top: 3rem;
 }
 
 h2 {
