@@ -1,4 +1,5 @@
 import './TextImage.scss';
+import { Button } from '../Button/Button';
 
 /**
  * Component to format text and image side-by-side.
@@ -14,7 +15,6 @@ import './TextImage.scss';
  */
 
 export const TextImage = (props) => {
-    const includeButton = props.hasButton;
 
     return (
         <div className='text-image-section'>
@@ -23,7 +23,7 @@ export const TextImage = (props) => {
                 <img className='image' src={props.imageSource} alt={props.imageAlt} />
                 <div className='text-button'>
                     <p className='text'>{props.text}</p>
-
+                    {props.hasButton && <Button className='button' buttonLink={props.buttonLink} buttonText={props.buttonText} />}
                 </div>
             </div>
         </div>

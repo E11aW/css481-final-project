@@ -19,5 +19,9 @@
     .text-button {
         justify-content: flex-end;
         padding-left: 10rem;
+
+        .text {
+            padding-bottom: 3rem;
+        }
     }
 }

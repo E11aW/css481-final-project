@@ -1,4 +1,5 @@
 import './Button.scss';
+import { Link } from 'react-router-dom';
 
 /**
  * Button component that directs users to other pages/resources.
@@ -10,6 +11,6 @@ import './Button.scss';
 
 export const Button = (props) => {
     return (
-        <button className='button'><a className='button-text' href={props.buttonLink} target='_blank'>{props.buttonText}</a></button>
+        <button className='button'><Link className='button-text' to={props.buttonLink}>{props.buttonText}</Link></button>
     )
 }
