@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout/Layout';
 /* Importing pages */
 import { AboutUs } from './pages/about-us/about-us';
-import { Data } from './pages/data/data';
+import DataPage from "./pages/data";
 import { Game } from './pages/game/game';
 import { Homepage } from './pages/homepage/home';
 
@@ -14,7 +14,7 @@ function App() {
         <Route path="/" element={<Layout />} >
           <Route index element={<Homepage />} />
           <Route path="/about-us" element={<AboutUs />} />
-          <Route path="/data" element={<Data />} />
+          <Route path="/data" element={<DataPage />} />
           <Route path="/game" element={<Game />} />
         </Route>
       </Routes>

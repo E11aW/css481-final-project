@@ -1,0 +1,22 @@
+@use "../../_variables" as *;
+
+$text: #111827 !default;
+$text-muted: #6B7280 !default;
+$border: #E5E7EB !default;
+$surface: #FFFFFF !default;
+$surface-elevated: #FAFAFA !default;
+
+.data__table {
+  tbody tr:nth-child(odd) {
+    background: mix($surface, $surface-elevated, 80%);
+  }
+
+  th, td {
+    white-space: nowrap;
+    color: $text;
+
+    @media (max-width: 720px) {
+      white-space: normal;
+    }
+  }
+}
