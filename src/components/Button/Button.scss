@@ -1,0 +1,9 @@
+@import '../../variables.scss';
+
+.button {
+    background-color: $DeepBlue;
+
+    .button-text {
+        color: $OffWhite;
+    }
+}
