@@ -15,7 +15,7 @@ export const Homepage = () => {
           imageAlt='Placeholder'
           hasButton={true}
           buttonText='Learn More!'
-          buttLink='/about-us'
+          buttonLink='/about-us'
         />
       </MaxWidth>
     </main>
