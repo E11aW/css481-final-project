@@ -5,8 +5,8 @@ import './MaxWidth.scss';
  * This ensures all content is displayed in the center of the screen no matter the screen size.
  * @component
  */
-export const MaxWidth = ({ children }) => {
+export const MaxWidth = (props) => {
     return (
-        <div className='max-width-container'>{children}</div>
+        <div className='max-width-container'>{props.children}</div>
     );
 }

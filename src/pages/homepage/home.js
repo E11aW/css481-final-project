@@ -15,7 +15,7 @@ export const Homepage = () => {
         <ImageOverlay
           imageAlt='Glacier'
           imageSource={Glacier}
-          text='Website Title'
+          text='Tip of the Iceberg'
         />
         <h2 className='subheader-need-padding'>Game</h2>
         <div className='game-section'>
