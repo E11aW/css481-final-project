@@ -1,15 +1,14 @@
 @import '../../variables.scss';
 
 .button {
+    display: inline-block;
     background-color: $DeepBlue;
-    padding: 1rem;
-    border-radius: 5%;
+    padding: 1rem 2rem;
+    border-radius: 10px;
     border: none;
     cursor: pointer;
-
-    .button-text {
-        color: $OffWhite;
-        font-size: 2rem;
-        text-decoration: none;
-    }
+    color: $OffWhite;
+    font-size: 2rem;
+    text-decoration: none;
+    text-align: center;
 }
