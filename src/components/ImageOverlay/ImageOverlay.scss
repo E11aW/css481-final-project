@@ -1,0 +1,22 @@
+@import '../../_variables.scss';
+
+.overlay-section {
+    width: 100%;
+    position: relative;
+    text-align: center;
+
+    .background-image {
+        opacity: 0.6;
+        width: 100%;
+    }
+
+    .text {
+        position: absolute;
+        font-size: 8rem;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: rgba($OffWhite, 0.5);
+        padding: 0 30px;
+    }
+}
