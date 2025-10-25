@@ -11,12 +11,12 @@ import Glacier from '../../assets/Home/glacier.jpg'
 export const Homepage = () => {
   return (
     <main className="homepage">
+      <ImageOverlay
+        imageAlt='Glacier'
+        imageSource={Glacier}
+        text='Tip of the Iceberg'
+      />
       <MaxWidth>
-        <ImageOverlay
-          imageAlt='Glacier'
-          imageSource={Glacier}
-          text='Tip of the Iceberg'
-        />
         <h2 className='subheader-need-padding'>Game</h2>
         <div className='game-section'>
           <Button className='game-button'

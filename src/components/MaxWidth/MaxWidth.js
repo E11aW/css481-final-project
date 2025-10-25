@@ -7,6 +7,6 @@ import './MaxWidth.scss';
  */
 export const MaxWidth = (props) => {
     return (
-        <div className='max-width-container'>{props.children}</div>
+        <div className='max-width'>{props.children}</div>
     );
 }
