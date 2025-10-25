@@ -1,0 +1,27 @@
+@import '../../variables.scss';
+
+.text-image-section {
+    padding-top: 3rem;
+}
+
+.text-image {
+    display: flex;
+    padding: 2rem 5rem 3rem 5rem;
+    align-items: center;
+
+    .image {
+        justify-content: flex-start;
+        width: 40%;
+        height: auto;
+        border-radius: 5%;
+    }
+
+    .text-button {
+        justify-content: flex-end;
+        padding-left: 10rem;
+
+        .text {
+            padding-bottom: 3rem;
+        }
+    }
+}

@@ -1,3 +1,16 @@
 @import '../../variables.scss';
 
-.homepage {}
+.game-section {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    padding: 3rem;
+
+    .game-button {
+        font-size: 4rem;
+    }
+}
+
+.subheader-need-padding {
+    padding-top: 3rem;
+}

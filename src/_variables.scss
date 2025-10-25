@@ -11,7 +11,7 @@ $SunsetOrange: #F7C6B0;
 $MutedOrange: #D9BDBD;
 // Basic Colors if needed
 $White: #FFFFFF;
-$Black: #000000;
+$Brown: #907c7cff;
 
 // Default Stylings
 * {
@@ -24,6 +24,7 @@ $Black: #000000;
 p {
     font-family: $font-body;
     font-size: 1.5rem;
+    color: $Brown;
 }
 
 h1,
@@ -33,5 +34,15 @@ h3 {
 }
 
 h1 {
-    font-size: 3rem;
+    font-size: 5rem;
+    text-transform: uppercase;
+    text-align: center;
+    color: $Brown;
+    padding-top: 3rem;
+}
+
+h2 {
+    font-size: 3.5rem;
+    color: $DeepBlue;
+    padding-left: 3rem;
 }

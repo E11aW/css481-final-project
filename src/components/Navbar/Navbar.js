@@ -3,7 +3,8 @@ import { userEffect, useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { MaxWidth } from '../MaxWidth/MaxWidth';
 
-/** Navbar component that renders links to each subpage
+/** 
+ * Navbar component that renders links to each subpage
  * @component
  */
 
