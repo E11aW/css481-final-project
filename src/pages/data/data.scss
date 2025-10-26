@@ -1,47 +1,40 @@
-// src/pages/data/data.scss
 @use "../../_variables" as *;
 
-// ---- Fallbacks so this file compiles even if those tokens aren't defined in _variables.scss ----
-// (Sass !default lets your real tokens win if they exist.)
-$text: #111827 !default;             // near-black
-$text-muted: #6B7280 !default;       // gray-500
-$border: #E5E7EB !default;           // gray-200
+$text: #111827 !default;
+$text-muted: #6B7280 !default;
+$border: #E5E7EB !default;
 $surface: #FFFFFF !default;
 $surface-elevated: #FAFAFA !default;
 
 .data {
-  padding: 2rem 0;
+  padding: 1.25rem 0 2.5rem;
 
   &__header {
-    margin-bottom: 1rem;
+    margin: 0 auto 0.5rem;
+    text-align: center;
 
-    h1 {
-      margin: 0 0 0.25rem;
-      font-size: clamp(1.5rem, 2vw, 2rem);
-      color: $text;
-    }
-
-    .data__sub {
-      margin: 0;
-      color: $text-muted;
-    }
+    h1 { margin: 0 0 .25rem; font-size: clamp(1.25rem, 2.2vw, 1.75rem); color: $text; }
+    .data__sub { margin: 0 auto; max-width: 68ch; color: $text-muted; }
   }
 
+  /* Filters row: keep things compact and aligned */
   &__controls {
     display: grid;
     grid-template-columns:
-      repeat(2, minmax(150px, 220px))
-      repeat(2, 140px)
+      minmax(180px, 220px)
+      minmax(160px, 200px)
+      120px
+      120px
       minmax(180px, 220px)
       auto;
-    gap: 0.75rem;
+    gap: 0.5rem;
     align-items: center;
-    margin-top: 1rem;
+    margin: 0.5rem 0 0.5rem;
 
     .data__search,
     .data__select {
       width: 100%;
-      padding: 0.6rem 0.75rem;
+      padding: 0.55rem 0.65rem;
       border: 1px solid $border;
       border-radius: 0.5rem;
       background: $surface;
@@ -50,47 +43,42 @@ $surface-elevated: #FAFAFA !default;
   }
 
   &__meta {
+    margin-top: 0.25rem;
+    color: $text-muted;
     display: flex;
     justify-content: space-between;
-    margin-top: 0.75rem;
-    color: $text-muted;
-    font-size: 0.95rem;
   }
 
-  &__tableWrapper {
-    overflow: auto;
-    margin-top: 0.75rem;
-    border: 1px solid $border;
-    border-radius: 0.75rem;
+  &__sections {
+    margin-top: 0.5rem;
+    h2 { margin: 0.5rem 0; font-size: clamp(1.1rem, 1.8vw, 1.5rem); color: $text; }
+  }
+
+  /* Cards / chips */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: .75rem;
+  }
+  .card {
+    border: 2px solid $border;
+    border-radius: .75rem;
+    padding: .75rem 1rem;
     background: $surface;
   }
+  .groups .group { margin-bottom: 1rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chip { border: 1px solid currentColor; border-radius: 999px; padding: .25rem .6rem; background: #f9fafb; }
 
-  &__table {
-    width: 100%;
-    border-collapse: collapse;
-    background: $surface;
+  .row { display: flex; gap: 2rem; }
+  .label { color: $text-muted; margin: 0 0 .25rem; }
 
-    th,
-    td {
-      padding: 0.75rem 1rem;
-      border-bottom: 1px solid $border;
-      white-space: nowrap;
-      text-align: left;
-      color: $text;
-    }
-
-    thead th {
-      position: sticky;
-      top: 0;
-      background: $surface-elevated;
-      z-index: 1;
-    }
-  }
+  .trendlist { line-height: 1.8; }
 
   &__pagination {
     display: flex;
     gap: 0.5rem;
     justify-content: flex-end;
-    margin-top: 0.75rem;
+    margin-top: 0.5rem;
   }
 }
