@@ -11,6 +11,8 @@ import { Link } from 'react-router-dom';
 
 export const Button = (props) => {
     return (
-        <button className='button'><Link className='button-text' to={props.buttonLink}>{props.buttonText}</Link></button>
-    )
-}
+        <Link to={props.buttonLink} className="button">
+            {props.buttonText}
+        </Link>
+    );
+};
