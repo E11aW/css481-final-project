@@ -1,0 +1,14 @@
+@use "../../_variables" as *; // adjust if your variables file is elsewhere
+
+/* Component-specific tweaks; the base grid/layout is in pages/data/data.scss */
+.filter {
+  /* stack on small screens */
+  @media (max-width: 640px) {
+    display: grid;
+    grid-template-columns: 1fr;
+    .data__select,
+    .data__search {
+      width: 100%;
+    }
+  }
+}

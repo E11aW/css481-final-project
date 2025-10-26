@@ -1,1 +1,84 @@
-@import '../../variables.scss';
+@use "../../_variables" as *;
+
+$text: #111827 !default;
+$text-muted: #6B7280 !default;
+$border: #E5E7EB !default;
+$surface: #FFFFFF !default;
+$surface-elevated: #FAFAFA !default;
+
+.data {
+  padding: 1.25rem 0 2.5rem;
+
+  &__header {
+    margin: 0 auto 0.5rem;
+    text-align: center;
+
+    h1 { margin: 0 0 .25rem; font-size: clamp(1.25rem, 2.2vw, 1.75rem); color: $text; }
+    .data__sub { margin: 0 auto; max-width: 68ch; color: $text-muted; }
+  }
+
+  /* Filters row: keep things compact and aligned */
+  &__controls {
+    display: grid;
+    grid-template-columns:
+      minmax(180px, 220px)
+      minmax(160px, 200px)
+      120px
+      120px
+      minmax(180px, 220px)
+      auto;
+    gap: 0.5rem;
+    align-items: center;
+    margin: 0.5rem 0 0.5rem;
+
+    .data__search,
+    .data__select {
+      width: 100%;
+      padding: 0.55rem 0.65rem;
+      border: 1px solid $border;
+      border-radius: 0.5rem;
+      background: $surface;
+      color: $text;
+    }
+  }
+
+  &__meta {
+    margin-top: 0.25rem;
+    color: $text-muted;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__sections {
+    margin-top: 0.5rem;
+    h2 { margin: 0.5rem 0; font-size: clamp(1.1rem, 1.8vw, 1.5rem); color: $text; }
+  }
+
+  /* Cards / chips */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: .75rem;
+  }
+  .card {
+    border: 2px solid $border;
+    border-radius: .75rem;
+    padding: .75rem 1rem;
+    background: $surface;
+  }
+  .groups .group { margin-bottom: 1rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .chip { border: 1px solid currentColor; border-radius: 999px; padding: .25rem .6rem; background: #f9fafb; }
+
+  .row { display: flex; gap: 2rem; }
+  .label { color: $text-muted; margin: 0 0 .25rem; }
+
+  .trendlist { line-height: 1.8; }
+
+  &__pagination {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+}

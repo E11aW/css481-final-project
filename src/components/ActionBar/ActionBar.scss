@@ -1,0 +1,45 @@
+/* src/components/ActionBar/ActionBar.scss */
+@use "../../_variables" as *;
+
+/* fallbacks in case tokens aren't defined */
+$text: #111827 !default;
+$border: #E5E7EB !default;
+$surface: #ffffff !default;
+
+.actionBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0 1rem;
+  max-width: 100%;
+}
+
+/* Each child (button) should size to its content and never stretch */
+.actionBar__item {
+  display: inline-flex;       /* keep to content */
+  flex: 0 0 auto;
+}
+
+/* Strong but scoped overrides so your Button cannot become full-width here */
+.actionBar :where(button, a, [role="button"]) {
+  width: auto !important;
+  display: inline-flex;
+}
+
+/* If your Button renders a block wrapper, keep it content-sized here */
+.actionBar > * {
+  flex: 0 0 auto;
+  max-width: none;
+}
+
+/* Small screens: prefer horizontal scroll over multi-line wrapping */
+@media (max-width: 640px) {
+  .actionBar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px dashed rgba(0,0,0,0.06);
+  }
+  .actionBar__item { flex: 0 0 auto; }
+}

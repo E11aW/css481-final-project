@@ -1,0 +1,52 @@
+@use "../../_variables" as *;
+
+$text: #111827 !default;
+$text-muted: #6B7280 !default;
+$border: #E5E7EB !default;
+$surface: #FFFFFF !default;
+$surface-elevated: #FAFAFA !default;
+
+.data__tableWrapper {
+  overflow: auto;
+  border: 1px solid $border;
+  border-radius: .75rem;
+  background: $surface;
+}
+
+.data__table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: auto; /* let columns size naturally */
+
+  th, td {
+    padding: 0.65rem 0.85rem;
+    border-bottom: 1px solid $border;
+    white-space: nowrap;
+    text-align: left;
+    color: $text;
+    vertical-align: middle;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background: $surface-elevated;
+    z-index: 1;
+  }
+
+  /* Keep numeric columns tidy and spaced */
+  th:nth-child(2), td:nth-child(2) { /* Year */
+    width: 72px;
+    font-variant-numeric: tabular-nums;
+  }
+  th:nth-child(3), td:nth-child(3) { /* Month */
+    width: 60px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+  th:nth-child(4), td:nth-child(4) { /* Value */
+    width: 90px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}
