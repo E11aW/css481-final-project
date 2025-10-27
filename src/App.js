@@ -4,7 +4,7 @@ import { Layout } from './components/Layout/Layout';
 /* Importing pages */
 import { AboutUs } from './pages/about-us/about-us';
 import DataPage from "./pages/data/data";
-import { Game } from './pages/game/game';
+import  Game  from './pages/game/game';
 import { Homepage } from './pages/homepage/home';
 
 function App() {
