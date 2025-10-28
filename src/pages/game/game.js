@@ -2,7 +2,7 @@
 import { useEffect, useRef } from "react";
 import "./game.scss";
 
-export default function Game() {
+export const Game = () => {
   const canvasRef = useRef(null);
   const scoreRef = useRef(null);
   const pauseBtnRef = useRef(null);
