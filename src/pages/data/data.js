@@ -19,7 +19,7 @@ import {
   summaryStats,
 } from "../../back-end/dataSource";
 
-export default function DataPage() {
+export const Data = () =>{
   const [datasets, setDatasets] = useState([]);
   const [state, setState] = useState({
     datasetId: 0,
