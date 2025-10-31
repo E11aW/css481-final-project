@@ -33,8 +33,8 @@ export const Homepage = () => {
           ]}
 
         />
+        <h2 className='about-us-subheader'>About Us</h2>
         <TextImage
-          subheader='About Us'
           text='We are a small team of 4 developers working to spread awareness about climate change and its impacts on arctic habitats. We all attend the University of Washington Bothell and completed this website as our final project for a Web Developing class. Our goal was to improve our frontend skills, connecting that with backend data to create a website that is visually interesting while also presenting the important data.'
           imageSource={Placeholder}
           imageAlt='Placeholder'
