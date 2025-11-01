@@ -278,7 +278,7 @@ export const Game = () => {
     <main className="game">
       <div className="gameRoot">
         <header className="gameHeader">
-          <div className="title">Arctic Seal — Prototype</div>
+          <div className="title">Save The Seal</div>
           <div className="controls">
             <div ref={scoreRef} id="scoreDisplay">Time: 0.0s</div>
             <button ref={restartBtnRef} className="secondary">Restart</button>
@@ -290,7 +290,7 @@ export const Game = () => {
 
         <div ref={touchBtnRef} id="touchButton" aria-hidden="true">HOLD</div>
         <div id="toolbar" />
-        <div id="message">Hold space / hold the button to stick to hills</div>
+        <div id="message">Hold space / the button to stick to hills</div>
       </div>
     </main>
   );
