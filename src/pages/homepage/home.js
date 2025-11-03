@@ -2,11 +2,12 @@ import './home.scss';
 import { MaxWidth } from '../../components/MaxWidth/MaxWidth';
 import { TextImage } from '../../components/TextImage/TextImage';
 import { ImageOverlay } from '../../components/ImageOverlay/ImageOverlay';
-import { Button } from '../../components/Button/Button';
 import { CardGrid } from '../../components/CardGrid/CardGrid';
+import { SealRoller } from '../../components/SealRoller/SealRoller';
 import Placeholder from '../../assets/Home/placeholder.png';
 import GraphPlaceholder from '../../assets/Home/graph_placeholder.png'
 import Glacier from '../../assets/Home/glacier.jpg'
+import { Seal } from '../../components/Seal/Seal';
 
 export const Homepage = () => {
   return (
@@ -18,12 +19,13 @@ export const Homepage = () => {
       />
       <MaxWidth>
         <h2 className='subheader-need-padding'>Game</h2>
-        <div className='game-section'>
+        {/* <div className='game-section'>
           <Button className='game-button'
             buttonText='Play Game'
             buttonLink='/game'
           />
-        </div>
+        </div> */}
+        <SealRoller />
         <CardGrid
           subheader='Data'
           members={[
