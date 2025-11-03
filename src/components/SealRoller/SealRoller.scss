@@ -9,6 +9,8 @@
 
     .seal-image {
         position: absolute;
-        will-change: transform, top, left;
+        will-change: transform;
+        transition: transform 0.2s ease-out;
+        transform-origin: center center;
     }
 }

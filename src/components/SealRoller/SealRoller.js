@@ -8,6 +8,7 @@ export const SealRoller = () => {
     const [sealPosition, setSealPosition] = useState({ x: 100, y: 100 });
     const [isRolling, setIsRolling] = useState(false);
     const [rotation, setRotation] = useState(0);
+    const [facingRight, setFacingRight] = useState(true); // Track direction
 
     // References
     const targetPositionRef = useRef({ x: 100, y: 100 });
@@ -18,8 +19,9 @@ export const SealRoller = () => {
     // Set seal speed
     const speed = 0.15;
     // Set bounce values
-    const spring = 0.1; // spring tightness
-    const damping = 0.8; // slowing after bounce
+    const spring = 0.08; // spring tightness
+    const damping = 0.85; // slowing after bounce
+    const stopThreshold = 8;
 
     // Mouse tracking
     useEffect(() => {
@@ -51,6 +53,11 @@ export const SealRoller = () => {
             const dy = target.y - seal.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
 
+            // Flip direction if moving horizontally
+            if (Math.abs(dx) > 10) {
+                setFacingRight(dx > 0);
+            }
+
             // Spring physics for bounce effect after rolling
             velocity.x = (velocity.x * damping) + (dx * spring);
             velocity.y = (velocity.y * damping) + (dy * spring);
@@ -62,11 +69,20 @@ export const SealRoller = () => {
             setSealPosition({ x: seal.x, y: seal.y });
 
             // Rotation and sprite switching
-            if (distance > 5) {
+            if (distance > stopThreshold) {
                 setIsRolling(true);
-                setRotation((r) => r + 12);
+                // Rotate based on current facing direction
+                setRotation((r) => (r + (facingRight ? 12 : -12)) % 360);
             } else {
+                // Snap to stop
+                velocity.x = 0;
+                velocity.y = 0;
                 setIsRolling(false);
+                setRotation((r) => {
+                    const targetAngle = facingRight ? Math.ceil(r / 360) * 360 : Math.floor(r / 360) * 360;
+                    const difference = targetAngle - r;
+                    return Math.abs(difference) < 0.5 ? targetAngle : difference * 0.5 + r;
+                });
             }
 
             requestRef.current = requestAnimationFrame(animate);
@@ -74,7 +90,7 @@ export const SealRoller = () => {
 
         requestRef.current = requestAnimationFrame(animate);
         return () => cancelAnimationFrame(requestRef.current);
-    }, []);
+    }, [facingRight]);
 
 
     return (
@@ -90,8 +106,13 @@ export const SealRoller = () => {
                     top: `${sealPosition.y}px`,
                     width: '100px',
                     height: '100px',
-                    transform: `rotate(${rotation}deg) scale(${isRolling ? 1 : 1.1})`,
-                    transition: isRolling ? 'none' : 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)', // bounce ease
+                    transform: `
+                        scaleX(${facingRight ? 1 : -1})
+                        rotate(${rotation}deg) 
+                        scale(${isRolling ? 1 : 1.1})
+                    `,
+                    transformOrigin: 'center',
+                    transition: isRolling ? 'none' : 'transform 0.5s ease-out', // bounce ease
                     pointerEvents: 'none',
                 }}
             />
