@@ -25,9 +25,17 @@ export const SealRoller = () => {
 
     // Mouse tracking
     useEffect(() => {
+        const section = document.querySelector('.seal-section');
+        const rect = section.getBoundingClientRect();
+
+        // Center seal inside the section
+        const startX = rect.left + (rect.width / 2) - 50;
+        const startY = rect.top + (rect.height / 2) - 50;
+        setSealPosition({ x: startX, y: startY });
+        sealPositionRef.current = { x: startX, y: startY };
+        targetPositionRef.current = { x: startX, y: startY };
+
         const handleMouseMove = (event) => {
-            const section = document.querySelector('.seal-section');
-            const rect = section.getBoundingClientRect();
 
             if ( // Checks if seal is within section bounds
                 event.clientX >= rect.left && event.clientX <= rect.right &&
