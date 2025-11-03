@@ -1,11 +1,27 @@
 @import '../../variables.scss';
 
 .seal-section {
-    height: 300px;
-    width: auto;
+    flex: 0 0 500px;
+
+    .fun-facts {
+        height: 50px;
+        margin-bottom: 10px;
+        position: absolute;
+        padding-left: 190px;
+        width: 100%;
+        text-align: left;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.5s ease-in-out;
+
+        &.visible {
+            opacity: 1;
+        }
+    }
 
     .seal-image {
         width: 100%;
         height: auto;
+        cursor: pointer;
     }
 }

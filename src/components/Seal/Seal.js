@@ -1,5 +1,5 @@
 import './Seal.scss';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 /**
  * Seal component to display a customized seal image for each member with fun facts.
@@ -11,6 +11,7 @@ import { useRef } from 'react';
 
 export const Seal = (props) => {
     const funFactRef = useRef(null);
+    const [visible, setVisible] = useState(false);
 
     const displayFunFact = () => {
         // Select a random fun fact from the array
@@ -19,11 +20,15 @@ export const Seal = (props) => {
         if (funFactRef.current) {
             funFactRef.current.textContent = props.funFacts[index];
         }
+        setVisible(true);
+
+        // Hide the fun fact after 3 seconds
+        setTimeout(() => setVisible(false), 3000);
     }
 
     return (
         <div className='seal-section'>
-            <div className='fun-facts'>
+            <div className={`fun-facts ${visible ? 'visible' : ''}`}>
                 <p className='fun-fact' ref={funFactRef}></p>
             </div>
             <img className='seal-image' src={props.imageSource} alt={props.imageAlt} onClick={displayFunFact} />

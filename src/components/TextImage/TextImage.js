@@ -32,6 +32,7 @@ export const TextImage = (props) => {
                     <img className='image' src={props.imageSource} alt={props.imageAlt} />
                 )}
                 <div className='text-button'>
+                    {props.funFacts && <h3>{props.imageAlt}</h3>}
                     <p className='text'>{props.text}</p>
                     {props.hasButton && <Button className='button' buttonLink={props.buttonLink} buttonText={props.buttonText} />}
                 </div>
