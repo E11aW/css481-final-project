@@ -15,6 +15,7 @@ export const SealRoller = () => {
     const sealPositionRef = useRef(sealPosition);
     const velocityRef = useRef({ x: 0, y: 0 });
     const requestRef = useRef(null);
+    const sectionRef = useRef(null);
 
     // Set seal speed
     const speed = 0.15;
@@ -22,26 +23,31 @@ export const SealRoller = () => {
     const spring = 0.08; // spring tightness
     const damping = 0.85; // slowing after bounce
     const stopThreshold = 8;
+    const sealSize = 100;
+
+    // Center seal on initial render
+    useEffect(() => {
+        if (sectionRef.current) {
+            const rect = sectionRef.current.getBoundingClientRect();
+            const startX = rect.width / 2 - sealSize / 2;
+            const startY = rect.height / 2 - sealSize / 2;
+
+            setSealPosition({ x: startX, y: startY });
+            sealPositionRef.current = { x: startX, y: startY };
+            targetPositionRef.current = { x: startX, y: startY };
+        }
+    }, []);
 
     // Mouse tracking
     useEffect(() => {
-        const section = document.querySelector('.seal-section');
-        const rect = section.getBoundingClientRect();
-
-        // Center seal inside the section
-        const startX = rect.left + (rect.width / 2) - 50;
-        const startY = rect.top + (rect.height / 2) - 50;
-        setSealPosition({ x: startX, y: startY });
-        sealPositionRef.current = { x: startX, y: startY };
-        targetPositionRef.current = { x: startX, y: startY };
-
         const handleMouseMove = (event) => {
+            if (!sectionRef.current) return;
+            const rect = sectionRef.current.getBoundingClientRect();
+            const x = event.clientX - rect.left - sealSize / 2;
+            const y = event.clientY - rect.top - sealSize / 2;
 
-            if ( // Checks if seal is within section bounds
-                event.clientX >= rect.left && event.clientX <= rect.right &&
-                event.clientY >= rect.top && event.clientY <= rect.bottom
-            ) {
-                targetPositionRef.current = { x: event.clientX - 50, y: event.clientY - 50 };
+            if (x >= 0 && x <= rect.width - sealSize && y >= 0 && y <= rect.height - sealSize) {
+                targetPositionRef.current = { x: x, y: y };
             }
         };
 
@@ -73,10 +79,17 @@ export const SealRoller = () => {
             seal.x += velocity.x * speed;
             seal.y += velocity.y * speed;
 
+            if (sectionRef.current) {
+                const rect = sectionRef.current.getBoundingClientRect();
+                // Boundary checks
+                seal.x = Math.max(0, Math.min(seal.x, rect.width - sealSize));
+                seal.y = Math.max(0, Math.min(seal.y, rect.height - sealSize));
+            }
+
             sealPositionRef.current = { x: seal.x, y: seal.y };
             setSealPosition({ x: seal.x, y: seal.y });
 
-            // Rotation and sprite switching
+            // Rotation and rolling
             if (distance > stopThreshold) {
                 setIsRolling(true);
                 // Rotate based on current facing direction
@@ -89,7 +102,7 @@ export const SealRoller = () => {
                 setRotation((r) => {
                     const targetAngle = facingRight ? Math.ceil(r / 360) * 360 : Math.floor(r / 360) * 360;
                     const difference = targetAngle - r;
-                    return Math.abs(difference) < 0.5 ? targetAngle : difference * 0.5 + r;
+                    return Math.abs(difference) < 0.5 ? targetAngle : difference * 0.05 + r;
                 });
             }
 
@@ -100,20 +113,18 @@ export const SealRoller = () => {
         return () => cancelAnimationFrame(requestRef.current);
     }, [facingRight]);
 
-
     return (
-        <div className='seal-section'>
+        <div className='seal-section' ref={sectionRef}>
             <img
                 src={isRolling ? RollingSeal : StillSeal}
                 className={`seal-image ${isRolling ? 'rolling' : ''}`}
                 alt='Seal'
                 // Include some styling here for position and rotation
                 style={{
-                    position: 'fixed',
                     left: `${sealPosition.x}px`,
                     top: `${sealPosition.y}px`,
-                    width: '100px',
-                    height: '100px',
+                    width: `${sealSize}px`,
+                    height: `${sealSize}px`,
                     transform: `
                         scaleX(${facingRight ? 1 : -1})
                         rotate(${rotation}deg) 
