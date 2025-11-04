@@ -2,6 +2,7 @@ import './SealRoller.scss';
 import StillSeal from '../../assets/Game/SealSprite.png';
 import RollingSeal from '../../assets/Game/RollSprite.png';
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 export const SealRoller = () => {
     // Controllers for animation frames
@@ -93,14 +94,14 @@ export const SealRoller = () => {
             if (distance > stopThreshold) {
                 setIsRolling(true);
                 // Rotate based on current facing direction
-                setRotation((r) => (r + (facingRight ? 12 : -12)) % 360);
+                setRotation((r) => r + 12);
             } else {
                 // Snap to stop
                 velocity.x = 0;
                 velocity.y = 0;
                 setIsRolling(false);
                 setRotation((r) => {
-                    const targetAngle = facingRight ? Math.ceil(r / 360) * 360 : Math.floor(r / 360) * 360;
+                    const targetAngle = 0;
                     const difference = targetAngle - r;
                     return Math.abs(difference) < 0.5 ? targetAngle : difference * 0.05 + r;
                 });
@@ -115,27 +116,25 @@ export const SealRoller = () => {
 
     return (
         <div className='seal-section' ref={sectionRef}>
-            <img
-                src={isRolling ? RollingSeal : StillSeal}
-                className={`seal-image ${isRolling ? 'rolling' : ''}`}
-                alt='Seal'
-                // Include some styling here for position and rotation
-                style={{
-                    left: `${sealPosition.x}px`,
-                    top: `${sealPosition.y}px`,
-                    width: `${sealSize}px`,
-                    height: `${sealSize}px`,
-                    transform: `
-                        scaleX(${facingRight ? 1 : -1})
-                        rotate(${rotation}deg) 
-                        scale(${isRolling ? 1 : 1.1})
-                    `,
-                    transformOrigin: 'center',
-                    transition: isRolling ? 'none' : 'transform 0.5s ease-out', // bounce ease
-                    pointerEvents: 'none',
-                }}
-            />
+            <Link to="/game">
+                <img
+                    src={isRolling ? RollingSeal : StillSeal}
+                    className={`seal-image ${isRolling ? 'rolling' : ''}`}
+                    alt='Seal'
+                    // Include some styling here for position and rotation
+                    style={{
+                        width: `${sealSize}px`,
+                        height: `${sealSize}px`,
+                        transform: `
+                            translate(${sealPosition.x}px, ${sealPosition.y}px)
+                            scaleX(${facingRight ? 1 : -1})
+                            rotate(${rotation}deg) 
+                            scale(${isRolling ? 1 : 1.1})
+                        `,
+                        transition: isRolling ? 'none' : 'transform 0.5s ease-out', // bounce ease
+                    }}
+                />
+            </Link>
         </div>
     );
 }
-

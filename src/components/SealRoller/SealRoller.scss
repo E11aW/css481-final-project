@@ -12,5 +12,6 @@
         will-change: transform;
         transition: transform 0.2s ease-out;
         transform-origin: center center;
+        pointer-events: auto;
     }
 }
