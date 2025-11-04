@@ -14,11 +14,11 @@ export const Game = () => {
     const ctx = canvas.getContext("2d", { alpha: false });
 
     // ----- Sizing -----
-    let W = 800, H = 450;
+    let W = 800, H = 250; //used to be 800, 450
     const resize = () => {
       const dpr = Math.max(1, window.devicePixelRatio || 1);
       W = Math.max(600, Math.min(window.innerWidth, 1200));
-      H = Math.max(320, window.innerHeight - 110);
+      H = Math.max(200, window.innerHeight - 150); //used to be 320
       canvas.width = Math.floor(W * dpr);
       canvas.height = Math.floor(H * dpr);
       canvas.style.width = W + "px";
