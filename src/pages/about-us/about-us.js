@@ -27,7 +27,7 @@ export const AboutUs = () => {
           imageAlt='Ella Williams'
           text='I am an undergraduate student at the University of Washington Bothell working towards a Bachelor of Science in Computer Science and Software Engineering. I work on campus and am a very active member of our campus’s robotics team: TrickFire Robotics. I am well-versed in a wide variety of programming languages, including both frontend and backend.'
           hasButton={false}
-          funFacts={['I have a pet cornsnake', 'I like doing arts and crafts', 'I know what Pokemon is', 'I have loved dragons my entire life', 'I am such a workaholic', 'I am a very chaotic seal', 'I turned everyone into seals', 'I hate deserts, minus cacti of course']}
+          funFacts={['I have a pet cornsnake', 'I like doing arts and crafts', 'I know what Pokemon is', 'I have loved dragons my entire life', 'I am such a workaholic', 'I am a very chaotic seal', 'I turned everyone into seals', 'I hate deserts, minus cacti of course', 'I enjoy mindless wandering', 'Sleep is my biggest priority', 'I love the rain']}
         />
         <TextImage
           imageSource={IshaanSeal}

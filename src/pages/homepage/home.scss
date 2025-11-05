@@ -1,5 +1,12 @@
 @import '../../variables.scss';
 
+.slogan {
+    text-align: center;
+    color: $SunsetOrange;
+    padding-top: 1rem;
+    font-size: 2rem;
+}
+
 .game-section {
     display: flex;
     justify-content: center;
@@ -13,4 +20,5 @@
 
 .subheader-need-padding {
     padding-top: 3rem;
+    padding-bottom: 3rem;
 }
