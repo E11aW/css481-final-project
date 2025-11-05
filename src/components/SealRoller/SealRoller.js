@@ -123,6 +123,7 @@ export const SealRoller = () => {
 
     return (
         <div className='seal-roll-section' ref={sectionRef} style={{ backgroundImage: `url(${background})` }}>
+            <p className='overlay'>Click the seal to play our game!</p>
             <Link to="/game">
                 <img
                     src={isRolling ? RollingSeal : StillSeal}

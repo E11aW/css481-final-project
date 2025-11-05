@@ -14,4 +14,13 @@
         transform-origin: center center;
         pointer-events: auto;
     }
+
+    .overlay {
+        position: absolute;
+        background-color: rgba($White, 0.5);
+        padding: 10px;
+        line-height: 1;
+        z-index: 1;
+        pointer-events: none;
+    }
 }
