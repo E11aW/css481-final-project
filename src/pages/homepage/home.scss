@@ -22,3 +22,12 @@
     padding-top: 3rem;
     padding-bottom: 3rem;
 }
+
+.mw-900 {
+  max-width: 900px;
+  margin: 1rem auto 2rem;
+  background: $OffWhite;
+  border: 1px solid $SteelGray;
+  border-radius: 12px;
+  padding: 0.75rem;
+}

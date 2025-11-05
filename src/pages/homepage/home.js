@@ -26,12 +26,17 @@ export const Homepage = () => {
         <SealRoller />
         <h2 className='subheader-need-padding'>Data</h2>
           <h3 className= 'subheader-need-padding'>Antarctica Heat Map</h3>
+          <div className="mw-900">
           <D3HeatMap
             imageSrc= {MapofAntartica}
             points= {pts}
             normalized= {true}
             cellSize= {28}
           />
+          hasButton= {true}
+          buttonText= 'More Data!'
+          buttonLink= '/data'
+          </div>
         <h2 className='about-us-subheader'>About Us</h2>
         <TextImage
           text='We are a small team of 4 developers working to spread awareness about climate change and its impacts on arctic habitats. We all attend the University of Washington Bothell and completed this website as our final project for a Web Developing class. Our goal was to improve our frontend skills, connecting that with backend data to create a website that is visually interesting while also presenting the important data.'
