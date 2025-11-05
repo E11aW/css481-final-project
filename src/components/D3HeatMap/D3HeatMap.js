@@ -1,20 +1,14 @@
-// src/components/D3Heatmap.js
 // React + D3 canvas heatmap overlay for a base PNG image.
-// Usage:
-//   import D3Heatmap from "./D3Heatmap";
-//   <D3Heatmap imageSrc="/assets/Map-of-Antarctica.png" points={points} cellSize={28} />
-//
 // Install: npm i d3
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./D3HeatMap.scss";
 
-export default function D3Heatmap({
+export default function D3HeatMap({
   imageSrc,
-  points = [],
-  normalized = true,           // true => points as { nx, ny, value }
-  cellSize = 24,               // grid size in image pixels
+  points = [],                 // normalized points: { nx, ny, value, label? }
+  normalized = true,
+  cellSize = 24,               // grid size in IMAGE pixels
   colorScheme = d3.interpolateMagma,
   showLegend = true,
   className,
@@ -25,6 +19,7 @@ export default function D3Heatmap({
   const canvasRef = useRef(null);
   const [imgNatural, setImgNatural] = useState({ w: 0, h: 0 });
   const [rect, setRect] = useState(null);
+  const [tooltip, setTooltip] = useState(null); // { x, y, point }
 
   // Observe container size for responsiveness
   useEffect(() => {
@@ -37,7 +32,7 @@ export default function D3Heatmap({
     return () => ro.disconnect();
   }, []);
 
-  // Read the image’s natural size when it loads
+  // Image natural size
   const onImgLoad = () => {
     if (!imgRef.current) return;
     const w = imgRef.current.naturalWidth;
@@ -45,18 +40,19 @@ export default function D3Heatmap({
     if (w && h) setImgNatural({ w, h });
   };
 
-  // Convert input points -> image space (pixels)
+  // Convert input points -> IMAGE pixels
   const pointsPx = useMemo(() => {
     if (!imgNatural.w || !imgNatural.h) return [];
-    if (!normalized) return points;
+    if (!normalized) return points.map(p => ({ ...p })); // assume x,y in px
     return points.map(p => ({
       x: Math.round((p.nx ?? 0) * imgNatural.w),
       y: Math.round((p.ny ?? 0) * imgNatural.h),
       value: p.value ?? 0,
+      label: p.label,
     }));
   }, [points, normalized, imgNatural]);
 
-  // Bin points on a grid in IMAGE space (stable regardless of render size)
+  // Bin into grid (in IMAGE space)
   const bins = useMemo(() => {
     const grid = new Map();
     const key = (i, j) => `${i},${j}`;
@@ -78,14 +74,13 @@ export default function D3Heatmap({
     return { cells, min, max };
   }, [pointsPx, cellSize]);
 
-  // Draw heatmap to canvas in RENDER space
+  // Draw heatmap (RENDER space)
   useEffect(() => {
     if (!rect || !canvasRef.current || !imgNatural.w || !imgNatural.h) return;
     const cvs = canvasRef.current;
     const ctx = cvs.getContext("2d");
     if (!ctx) return;
 
-    // size canvas to container width & image aspect
     const containerW = Math.round(rect.width);
     const containerH = Math.round(containerW * (imgNatural.h / imgNatural.w));
     const dpr = window.devicePixelRatio || 1;
@@ -96,14 +91,11 @@ export default function D3Heatmap({
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, containerW, containerH);
 
-    // image->render scales
     const sx = containerW / imgNatural.w;
     const sy = containerH / imgNatural.h;
 
-    // color scale
     const color = d3.scaleSequential(colorScheme).domain([bins.min, bins.max]);
 
-    // draw each cell
     for (const c of bins.cells) {
       const x = c.i * cellSize * sx;
       const y = c.j * cellSize * sy;
@@ -114,7 +106,36 @@ export default function D3Heatmap({
     }
   }, [rect, imgNatural, bins, cellSize, colorScheme]);
 
-  // Legend: small gradient bar (uses same color scale)
+  // Hover: nearest point (in IMAGE space)
+  function handleMouseMove(e) {
+    if (!wrapRef.current || !imgNatural.w || !imgNatural.h) return;
+    const bounds = wrapRef.current.getBoundingClientRect();
+    const mx = e.clientX - bounds.left;
+    const my = e.clientY - bounds.top;
+
+    const containerW = bounds.width;
+    const containerH = containerW * (imgNatural.h / imgNatural.w);
+    const sx = containerW / imgNatural.w;
+    const sy = containerH / imgNatural.h;
+    const ix = mx / sx; // IMAGE space x
+    const iy = my / sy; // IMAGE space y
+
+    let nearest = null, bestD2 = Infinity;
+    for (const p of pointsPx) {
+      const dx = p.x - ix, dy = p.y - iy;
+      const d2 = dx*dx + dy*dy;
+      if (d2 < bestD2) { bestD2 = d2; nearest = p; }
+    }
+    const threshold = Math.max(24, cellSize * 1.5); // IMAGE px
+    if (!nearest || Math.sqrt(bestD2) > threshold) {
+      setTooltip(null);
+      return;
+    }
+    setTooltip({ x: mx + 12, y: my + 12, point: nearest });
+  }
+  function handleMouseLeave() { setTooltip(null); }
+
+  // Legend (same scale)
   function Legend() {
     const ref = useRef(null);
     useEffect(() => {
@@ -136,7 +157,7 @@ export default function D3Heatmap({
       }
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, w, h);
-    }, [ref]);
+    }, []);
     return (
       <div className="legend">
         <span className="legend-min">{bins.min.toFixed(2)}</span>
@@ -171,6 +192,23 @@ export default function D3Heatmap({
         className="heatmap-canvas"
         style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
       />
+      {/* Transparent pointer layer to capture mouse events */}
+      <div
+        className="heatmap-pointer"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{ position: "absolute", inset: 0 }}
+      />
+      {/* Tooltip */}
+      {tooltip && (
+        <div className="heatmap-tooltip" style={{ left: tooltip.x, top: tooltip.y }}>
+          <div className="heatmap-tooltip-title">
+            {tooltip.point.label ?? "Data Point"}
+          </div>
+          <div>Value: {Number.isFinite(tooltip.point.value) ? tooltip.point.value.toFixed(2) : tooltip.point.value}</div>
+          <div className="coords">x: {Math.round(tooltip.point.x)}, y: {Math.round(tooltip.point.y)}</div>
+        </div>
+      )}
       {showLegend && <Legend />}
     </div>
   );
