@@ -108,7 +108,7 @@ export const SealRoller = () => {
                 velocity.y = 0;
                 setIsRolling(false);
                 setRotation((r) => {
-                    const targetAngle = facingRight ? Math.ceil(r / 360) * 360 : Math.floor(r / 360) * 360;
+                    const targetAngle = Math.round(r / 360) * 360;
                     const difference = targetAngle - r;
                     return Math.abs(difference) < 0.5 ? targetAngle : difference * 0.05 + r;
                 });
