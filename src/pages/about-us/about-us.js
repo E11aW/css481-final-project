@@ -34,7 +34,7 @@ export const AboutUs = () => {
           imageAlt='Ishaan Shete'
           text='Hi, I’m a CSSE student at UW Bothell set to graduate in June 2026. I love collaborating on full-stack apps and machine learning projects. I have also been playing the Tabla (drum-like instrument) for 18+ years and enjoying competing in all kinds of physical sports.'
           hasButton={false}
-          funFacts={['I speak 7 languages', 'I’ve been playing Tabla (drum-like) instrument for 18+ yrs', 'I like playing all sports']}
+          funFacts={['I speak 7 languages', 'I’ve been playing Tabla (drum-like) instrument for 18+ yrs', 'I like playing all sports', 'I love eating food', 'I like watching movies', 'Give me cookies', 'I have lived in 5 different cities']}
         />
         <TextImage
           imageSource={MaxxSeal}
