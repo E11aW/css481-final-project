@@ -76,7 +76,7 @@ export const LineGraph = ({ width = 640, height = 320 }) => {
     <section className="line-graph">
       <header className="line-graph__header">
         <h2>Atmospheric CO₂</h2>
-        <p className="line-graph__subtitle">ppm at selected months (from your JSON)</p>
+        <p className="line-graph__subtitle">ppm at selected months</p>
       </header>
       <svg ref={ref} className="line-graph__svg" />
     </section>
