@@ -1,0 +1,36 @@
+@import '../../variables.scss';
+
+.line-graph {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  background: $OffWhite;
+  border: 1px solid $SteelGray;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+
+  h2 {
+    font-family: $font-heading;
+    color: $DeepBlue;
+    font-size: 2rem;
+    margin-bottom: 4px;
+  }
+
+  .line-graph__subtitle {
+    font-family: $font-body;
+    color: $Brown;
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+
+  .line-graph__svg { width: 100%; height: 320px; display: block; }
+
+  .axis text { font-family: $font-body; fill: $Brown; font-size: 12px; }
+  .axis path, .axis line { stroke: $SteelGray; }
+
+  .grid line { stroke: lighten($SteelGray, 10%); }
+
+  .line-path { stroke: $DeepBlue; stroke-width: 2.5; }
+  .dot { fill: $White; stroke: $DeepBlue; stroke-width: 2; }
+}
