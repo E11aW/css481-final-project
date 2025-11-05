@@ -15,6 +15,11 @@
         pointer-events: auto;
     }
 
+    .snowball {
+        position: absolute;
+        pointer-events: none;
+    }
+
     .overlay {
         position: absolute;
         background-color: rgba($White, 0.5);

@@ -20,28 +20,28 @@ export const AboutUs = () => {
           imageAlt='Clayton McArthur'
           text='Hi, I’m a CSSE student at the University of Washington Bothell and President of TrickFire Robotics, an 100+ member engineering club. I enjoy building software that interacts with the hardware level, interacts with the network, and interacts with large data sets. I strive to be a good team player and leader.'
           hasButton={false}
-          funFacts={['Send me fun facts']}
+          funFacts={['I used to live in Vietnam', 'I love snowboarding', 'I am president of Trickfire', 'My favorite coding language is C++', 'My dream job is to work at SpaceX', 'My favorite color is black', 'I have an e36 drift car']}
         />
         <TextImage
           imageSource={EllaSeal}
           imageAlt='Ella Williams'
           text='I am an undergraduate student at the University of Washington Bothell working towards a Bachelor of Science in Computer Science and Software Engineering. I work on campus and am a very active member of our campus’s robotics team: TrickFire Robotics. I am well-versed in a wide variety of programming languages, including both frontend and backend.'
           hasButton={false}
-          funFacts={['I have a pet cornsnake', 'I like doing arts and crafts', 'I know what Pokemon is', 'I have loved dragons my entire life', 'I am such a workaholic', 'I am a very chaotic seal', 'I turned everyone into seals', 'I hate deserts, minus cacti of course', 'I enjoy mindless wandering', 'Sleep is my biggest priority', 'I love the rain']}
+          funFacts={['I have a pet cornsnake', 'I like doing arts and crafts', 'I know what Pokemon is', 'I have loved dragons my entire life', 'I am such a workaholic', 'I am a very chaotic seal', 'I turned everyone into seals', 'I hate deserts, minus cacti of course', 'I enjoy mindless wandering', 'Sleep is my biggest priority', 'I love the rain', 'My favorite color is blue', 'I am a cat person', 'I did trapeze once']}
         />
         <TextImage
           imageSource={IshaanSeal}
           imageAlt='Ishaan Shete'
           text='Hi, I’m a CSSE student at UW Bothell set to graduate in June 2026. I love collaborating on full-stack apps and machine learning projects. I have also been playing the Tabla (drum-like instrument) for 18+ years and enjoying competing in all kinds of physical sports.'
           hasButton={false}
-          funFacts={['I speak 7 languages', 'I’ve been playing Tabla (drum-like) instrument for 18+ yrs', 'I like playing all sports']}
+          funFacts={['I speak 7 languages', 'I’ve been playing Tabla (drum-like) instrument for 18+ yrs', 'I like playing all sports', 'I love eating food', 'I like watching movies', 'Give me cookies', 'I have lived in 5 different cities']}
         />
         <TextImage
           imageSource={MaxxSeal}
           imageAlt='Maxx McArthur'
           text='I am a fourth year student at University of Washington Bothell pursuing a Computer Science/Software Engineering bachelors degree. I am proficient in C++ and I am currently working on rounding out my other coding skills and languages. I have used VScode, Docker, Keil Uvision5, Unbuntu, GitHub, PostgreSQL, and many more software systems extensively.'
           hasButton={false}
-          funFacts={['I graduated high school at 16', 'I have been snowboarding for 8 years', 'I have only been coding for 2 years']}
+          funFacts={['I graduated high school at 16', 'I have been snowboarding for 8 years', 'I have only been coding for 2 years', 'I love candy', 'I want to work at Netflix', 'I used to show hogs', 'I’ve never broken a bone']}
         />
       </MaxWidth>
     </main>
