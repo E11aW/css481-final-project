@@ -1,0 +1,28 @@
+/* src/components/D3Heatmap.scss */
+@use '../../_variables' as *;
+
+.heatmap-wrap {
+  background: $White;
+  border: 1px solid $SteelGray;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.heatmap-canvas {
+  display: block;
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: $Brown;
+  font-family: $font-body;
+  font-size: 0.9rem;
+
+  .legend-min, .legend-max {
+    opacity: 0.85;
+  }
+}
