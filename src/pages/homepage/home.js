@@ -15,6 +15,7 @@ export const Homepage = () => {
         text='Tip of the Iceberg'
       />
       <MaxWidth>
+        <h3 className='slogan'>Going deeper on the impacts of global warming</h3>
         <h2 className='subheader-need-padding'>Game</h2>
         <SealRoller />
         <h2 className='subheader-need-padding'>Data</h2>

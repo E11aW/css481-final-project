@@ -1,9 +1,16 @@
 import './SealRoller.scss';
 import StillSeal from '../../assets/Game/SealSprite.png';
 import RollingSeal from '../../assets/Game/RollSprite.png';
+import background from '../../assets/Home/sealBackground.png';
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
+/**
+ * SealRoller component that features an animated seal that follows the user's mouse cursor within 
+ * a set section of the screen, stopping when the user leaves that section. Clicking the seal also takes
+ * the user to the game page.
+ * @returns {JSX.Element}
+ */
 export const SealRoller = () => {
     // Controllers for animation frames
     const [sealPosition, setSealPosition] = useState({ x: 100, y: 100 });
@@ -115,11 +122,12 @@ export const SealRoller = () => {
     }, [facingRight]);
 
     return (
-        <div className='seal-section' ref={sectionRef}>
+        <div className='seal-roll-section' ref={sectionRef} style={{ backgroundImage: `url(${background})` }}>
+            <p className='overlay'>Click the seal to play our game!</p>
             <Link to="/game">
                 <img
                     src={isRolling ? RollingSeal : StillSeal}
-                    className={`seal-image ${isRolling ? 'rolling' : ''}`}
+                    className={`seal-roll-image ${isRolling ? 'rolling' : ''}`}
                     alt='Seal'
                     // Include some styling here for position and rotation
                     style={{

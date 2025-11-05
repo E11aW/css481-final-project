@@ -14,6 +14,7 @@ export const AboutUs = () => {
         <h2>Our Mission</h2>
         <p className='mission-paragraph'>Tip of the Iceberg focuses on spreading awareness on global warming and ice caps melting in an interactive and engaging way. This website includes multiple pages that share important data and statistics on these topics, using up-to-date information that demonstrates the true situation of global warming. We are striving to use data that goes deeper than the “tip of the iceberg”. Our game called “Save the Seal” interactively shares this data by presenting information about global warming to players as they roll through the game!</p>
         <h2>Our Team</h2>
+        <p className='seal-instructions'>Click the seals for fun facts about our members!</p>
         <TextImage
           imageSource={ClaytonSeal}
           imageAlt='Clayton McArthur'
@@ -26,7 +27,7 @@ export const AboutUs = () => {
           imageAlt='Ella Williams'
           text='I am an undergraduate student at the University of Washington Bothell working towards a Bachelor of Science in Computer Science and Software Engineering. I work on campus and am a very active member of our campus’s robotics team: TrickFire Robotics. I am well-versed in a wide variety of programming languages, including both frontend and backend.'
           hasButton={false}
-          funFacts={['I have a pet cornsnake', 'I like doing arts and crafts', 'I know what Pokemon is', 'I have loved dragons my entire life', 'I am such a workaholic', 'I am a very chaotic seal', 'I turned everyone into seals', 'I hate deserts, minus cacti of course']}
+          funFacts={['I have a pet cornsnake', 'I like doing arts and crafts', 'I know what Pokemon is', 'I have loved dragons my entire life', 'I am such a workaholic', 'I am a very chaotic seal', 'I turned everyone into seals', 'I hate deserts, minus cacti of course', 'I enjoy mindless wandering', 'Sleep is my biggest priority', 'I love the rain']}
         />
         <TextImage
           imageSource={IshaanSeal}
