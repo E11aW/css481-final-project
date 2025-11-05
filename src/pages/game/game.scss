@@ -55,8 +55,9 @@ button {
 
 canvas {
   display: block;
-  width: 100%;
-  flex: 1;
+  margin: 0 auto;
+  position: relative;
+  left: 0;
 }
 
 .hud {
@@ -69,10 +70,11 @@ canvas {
 
 #touchButton {
   position: absolute;
-  right: 18px;
-  bottom: 22px;
-  width: 72px;
-  height: 72px;
+  bottom: 48px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   border: 0;
   background: rgba(15, 154, 214, 0.95);
@@ -82,9 +84,36 @@ canvas {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 18px rgba(10, 50, 80, 0.18);
+  box-shadow: 0 4px 10px rgba(10, 50, 80, 0.18);
   user-select: none;
 }
+
+#touchButton:active {
+  background: rgba(10, 130, 180, 0.95);
+  transform: translateX(-50%) scale(0.95);
+}
+
+#control-buttons {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+
+#control-buttons button {
+  font-size: 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #a6bdc7;
+  transition: transform 0.2s ease;
+  &:hover {
+    transform: scale(1.2);
+  }
+}
+
 
 #toolbar {
   position: absolute;
@@ -94,11 +123,25 @@ canvas {
   gap: 8px;
 }
 
+#score-display {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 12px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: rgb(25, 139, 188);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
 #message {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 28px;
+  bottom: 0px;
+  gap: 12px;
   background: rgba(255, 255, 255, 0.9);
   padding: 8px 12px;
   border-radius: 8px;
