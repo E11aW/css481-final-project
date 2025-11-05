@@ -27,7 +27,7 @@ export const Homepage = () => {
         <h2 className='subheader-need-padding'>Data</h2>
           <h3 className= 'subheader-need-padding'>Antarctica Heat Map</h3>
           <D3HeatMap
-            imageSource= {MapofAntartica}
+            imageSrc= {MapofAntartica}
             points= {pts}
             normalized= {true}
             cellSize= {28}
