@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import "./BarGrapph.scss"; 
+import "./BarGraph.scss"; 
 
 export const BarGraph = ({ width = 640, height = 340 }) => {
   const ref = useRef(null);

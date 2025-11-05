@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
-import "./LineGrapph.scss"; 
+import "./LineGraph.scss"; 
 
 export const LineGraph = ({ width = 640, height = 320 }) => {
   const ref = useRef(null);
