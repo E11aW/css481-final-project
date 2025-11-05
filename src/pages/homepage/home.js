@@ -3,6 +3,7 @@ import { MaxWidth } from '../../components/MaxWidth/MaxWidth';
 import { TextImage } from '../../components/TextImage/TextImage';
 import { ImageOverlay } from '../../components/ImageOverlay/ImageOverlay';
 import { SealRoller } from '../../components/SealRoller/SealRoller';
+import { Button } from '../../components/Button/Button';
 import  D3HeatMap from '../../components/D3HeatMap/D3HeatMap';
 import Placeholder from '../../assets/Home/placeholder.png';
 import Glacier from '../../assets/Home/glacier.jpg'
@@ -33,9 +34,7 @@ export const Homepage = () => {
             normalized= {true}
             cellSize= {28}
           />
-          hasButton= {true}
-          buttonText= 'More Data!'
-          buttonLink= '/data'
+          <Button className='button' buttonLink='/data' buttonText='More Data!'/>
           </div>
         <h2 className='about-us-subheader'>About Us</h2>
         <TextImage
