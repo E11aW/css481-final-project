@@ -1,9 +1,17 @@
 import './SealRoller.scss';
 import StillSeal from '../../assets/Game/SealSprite.png';
 import RollingSeal from '../../assets/Game/RollSprite.png';
+import background from '../../assets/Home/sealBackground.png';
+import SnowBall from '../../assets/Home/snowball.png';
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
+/**
+ * SealRoller component that features an animated seal that follows the user's mouse cursor within 
+ * a set section of the screen, stopping when the user leaves that section. Clicking the seal also takes
+ * the user to the game page.
+ * @returns {JSX.Element}
+ */
 export const SealRoller = () => {
     // Controllers for animation frames
     const [sealPosition, setSealPosition] = useState({ x: 100, y: 100 });
@@ -26,6 +34,12 @@ export const SealRoller = () => {
     const stopThreshold = 8;
     const sealSize = 100;
 
+    // Snowball references and values
+    const snowballSize = 50;
+    const [snowballPosition, setSnowballPosition] = useState({ x: 70, y: 100 });
+    const snowballRef = useRef(snowballPosition);
+    const snowballVelocityRef = useRef({ x: 0, y: 0 });
+
     // Center seal on initial render
     useEffect(() => {
         if (sectionRef.current) {
@@ -33,9 +47,14 @@ export const SealRoller = () => {
             const startX = rect.width / 2 - sealSize / 2;
             const startY = rect.height / 2 - sealSize / 2;
 
+            // Place seal at start
             setSealPosition({ x: startX, y: startY });
             sealPositionRef.current = { x: startX, y: startY };
             targetPositionRef.current = { x: startX, y: startY };
+            // Place snowball next to seal
+            setSnowballPosition({ x: startX - 80, y: startY });
+            snowballRef.current = { x: startX - 80, y: startY };
+            snowballVelocityRef.current = { x: 0, y: 0 };
         }
     }, []);
 
@@ -101,11 +120,78 @@ export const SealRoller = () => {
                 velocity.y = 0;
                 setIsRolling(false);
                 setRotation((r) => {
-                    const targetAngle = facingRight ? Math.ceil(r / 360) * 360 : Math.floor(r / 360) * 360;
+                    const targetAngle = Math.round(r / 360) * 360;
                     const difference = targetAngle - r;
                     return Math.abs(difference) < 0.5 ? targetAngle : difference * 0.05 + r;
                 });
             }
+
+            // Snowball interaction and movement, referencing seal movement
+            const ball = snowballRef.current;
+            const ballVelocity = snowballVelocityRef.current;
+
+            // Move snowball if it has velocity
+            ball.x += ballVelocity.x;
+            ball.y += ballVelocity.y;
+            // Friction to slow snowball down
+            ballVelocity.x *= 0.94;
+            ballVelocity.y *= 0.94;
+
+            // Check bounds of snowball, bouncing off walls
+            if (sectionRef.current) {
+                const rect = sectionRef.current.getBoundingClientRect();
+
+                // Left wall
+                if (ball.x <= 0) {
+                    ball.x = 0;
+                    ballVelocity.x = -ballVelocity.x;
+                }
+                // Right wall
+                if (ball.x >= rect.width - snowballSize) {
+                    ball.x = rect.width - snowballSize;
+                    ballVelocity.x = -ballVelocity.x;
+                }
+                // Top wall
+                if (ball.y <= 0) {
+                    ball.y = 0;
+                    ballVelocity.y = -ballVelocity.y;
+                }
+                // Bottom wall
+                if (ball.y >= rect.height - snowballSize) {
+                    ball.y = rect.height - snowballSize;
+                    ballVelocity.y = -ballVelocity.y;
+                }
+            }
+
+            // Collision detection logic
+            const sealBox = {
+                x: seal.x,
+                y: seal.y,
+                w: sealSize - 10,
+                h: sealSize - 10
+            };
+            const ballBox = {
+                x: ball.x,
+                y: ball.y,
+                w: snowballSize,
+                h: snowballSize
+            };
+            // Check when seal and snowball overlap
+            if (
+                sealBox.x < ballBox.x + ballBox.w &&
+                sealBox.x + sealBox.w > ballBox.x &&
+                sealBox.y < ballBox.y + ballBox.h &&
+                sealBox.y + sealBox.h > ballBox.y
+            ) {
+                // Give ball some velocity in the seal's direction
+                ballVelocity.x = velocity.x * speed * 2;
+                ballVelocity.y = velocity.y * speed * 2;
+            }
+
+            // Set snowball position
+            snowballRef.current = { x: ball.x, y: ball.y };
+            setSnowballPosition({ x: ball.x, y: ball.y });
+            snowballVelocityRef.current = ballVelocity;
 
             requestRef.current = requestAnimationFrame(animate);
         };
@@ -115,11 +201,24 @@ export const SealRoller = () => {
     }, [facingRight]);
 
     return (
-        <div className='seal-section' ref={sectionRef}>
+        <div className='seal-roll-section' ref={sectionRef} style={{ backgroundImage: `url(${background})` }}>
+            <img
+                src={SnowBall}
+                className='snowball'
+                alt='snowball'
+                style={{
+                    width: `${snowballSize}px`,
+                    height: `${snowballSize}px`,
+                    left: `${snowballPosition.x}px`,
+                    top: `${snowballPosition.y}px`,
+                    transition: isRolling ? 'none' : 'transform 0.2s',
+                }}
+            />
+            <p className='overlay'>Click the seal to play our game!</p>
             <Link to="/game">
                 <img
                     src={isRolling ? RollingSeal : StillSeal}
-                    className={`seal-image ${isRolling ? 'rolling' : ''}`}
+                    className={`seal-roll-image ${isRolling ? 'rolling' : ''}`}
                     alt='Seal'
                     // Include some styling here for position and rotation
                     style={{

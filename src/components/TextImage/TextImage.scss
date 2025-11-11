@@ -6,7 +6,7 @@
 
 .text-image {
     display: flex;
-    padding: 2rem 5rem 3rem 5rem;
+    padding: 0 5rem 3rem 5rem;
     align-items: center;
 
     .image {
@@ -23,11 +23,11 @@
         .text {
             padding-bottom: 3rem;
         }
-
-        h3 {
-            padding-bottom: 1rem;
-            color: $DeepBlue;
-            font-size: 2.5rem;
-        }
     }
+}
+
+.seal-name {
+    padding-bottom: 0.5rem;
+    color: $DeepBlue;
+    font-size: 2.2rem;
 }

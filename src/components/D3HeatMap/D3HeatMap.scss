@@ -1,0 +1,54 @@
+/* Uses your project variables */
+@use '../../_variables' as *;
+
+.heatmap-wrap {
+  background: $White;
+  border: 1px solid $SteelGray;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+.heatmap-canvas { display: block; }
+
+/* capture mouse input */
+.heatmap-pointer { cursor: crosshair; }
+
+/* tooltip */
+.heatmap-tooltip {
+  position: absolute;
+  z-index: 2;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid $SteelGray;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  pointer-events: none;
+  font-family: $font-body;
+  font-size: 0.9rem;
+  color: $Brown;
+  transform: translate(0, 0);
+
+  .heatmap-tooltip-title {
+    font-family: $font-heading;
+    color: $DeepBlue;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+  }
+  .coords {
+    opacity: 0.7;
+    font-size: 0.8rem;
+  }
+}
+
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: $Brown;
+  font-family: $font-body;
+  font-size: 0.9rem;
+
+  .legend-min, .legend-max { opacity: 0.85; }
+}
