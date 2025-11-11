@@ -11,6 +11,7 @@ export const Game = () => {
   const restartBtnRef = useRef(null);
   const touchBtnRef = useRef(null);
 
+
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d", { alpha: false });
@@ -22,8 +23,8 @@ export const Game = () => {
     let W = 800, H = 450; //used to be 800, 450
     const resize = () => {
       const dpr = Math.max(1, window.devicePixelRatio || 1);
-      W = Math.max(900, Math.min(window.innerWidth)); 
-      H = Math.max(300, window.innerHeight - 200); //used to be 320
+      W = Math.max(700, window.innerWidth); 
+      H = Math.max(300, window.innerHeight-180); //used to be 320
       canvas.width = Math.floor(W * dpr);
       canvas.height = Math.floor(H * dpr);
       canvas.style.width = W + "px";
@@ -271,7 +272,7 @@ export const Game = () => {
     // ----- Draw Start Screen -----
     const drawStartScreen = () => {
       // Clear background
-      ctx.fillStyle = "#cfeefc";
+      ctx.fillStyle = '#cbe2e8ff';
       ctx.fillRect(0, 0, W, H);
       
       // Draw clouds (start screen)

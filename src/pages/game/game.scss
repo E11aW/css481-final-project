@@ -1,5 +1,5 @@
 // src/pages/game/game.scss
-@use "../../_variables" as *;
+@import '../../variables.scss';
 
 // safe fallbacks so this compiles even if tokens are missing
 $text: #0b1220 !default;
@@ -14,7 +14,7 @@ $text: #0b1220 !default;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(#cfeefc, #eaf7ff 60%);
+  background: linear-gradient($OffWhite, $White);
   position: relative; // for HUD elements
 }
 
@@ -28,7 +28,7 @@ $text: #0b1220 !default;
 
 .title {
   font-weight: 700;
-  color: #074b6b;
+  color: $DeepBlue;
 }
 
 .controls {
@@ -42,13 +42,13 @@ button {
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-  background: #0f9ad6;
-  color: #fff;
+  background: $SteelGray;
+  color: $White;
   font-weight: 600;
 
   &.secondary {
     background: transparent;
-    color: #0f9ad6;
+    color: $DeepBlue;
     border: 1px solid rgba(15, 154, 214, 0.15);
   }
 }
@@ -64,7 +64,7 @@ canvas {
   position: absolute;
   left: 12px;
   top: 12px;
-  color: #033;
+  color: $DeepBlue;
   font-weight: 700;
 }
 
@@ -77,8 +77,8 @@ canvas {
   height: 80px;
   border-radius: 50%;
   border: 0;
-  background: rgba(15, 154, 214, 0.95);
-  color: white;
+  background: $DeepBlue;
+  color: $White;
   font-weight: 800;
   font-size: 18px;
   display: flex;
@@ -89,7 +89,7 @@ canvas {
 }
 
 #touchButton:active {
-  background: rgba(10, 130, 180, 0.95);
+  background: $SteelGray;
   transform: translateX(-50%) scale(0.95);
 }
 
@@ -102,17 +102,7 @@ canvas {
   z-index: 20;
 }
 
-#control-buttons button {
-  font-size: 20px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: #a6bdc7;
-  transition: transform 0.2s ease;
-  &:hover {
-    transform: scale(1.2);
-  }
-}
+
 
 
 #toolbar {
@@ -134,27 +124,4 @@ canvas {
   font-weight: 600;
   color: rgb(25, 139, 188);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
-}
-
-#message {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 0px;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-weight: 600;
-  color: #094;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
-}
-
-@media (max-width: 600px) {
-  #touchButton {
-    right: 10px;
-    bottom: 12px;
-    width: 64px;
-    height: 64px;
-  }
 }
