@@ -2,6 +2,11 @@
 
 .seal-section {
     flex: 0 0 500px;
+    max-width: 500px;
+
+    @media (max-width: 1000px) {
+        flex: 0 0 0;
+    }
 
     .fun-facts {
         height: 50px;

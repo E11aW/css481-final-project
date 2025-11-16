@@ -7,6 +7,7 @@
 
     .background-image {
         opacity: 0.6;
+        // height: 100%;
         width: 100%;
     }
 
@@ -19,5 +20,12 @@
         background-color: rgba($OffWhite, 0.5);
         padding: 10px;
         line-height: 1;
+
+    }
+
+    @media (max-width: 1000px) {
+        .text {
+            font-size: 3rem;
+        }
     }
 }
