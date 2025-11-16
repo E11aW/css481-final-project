@@ -1,6 +1,6 @@
 import './Navbar.scss';
-import { userEffect, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { MaxWidth } from '../MaxWidth/MaxWidth';
 
 /** 
@@ -9,6 +9,8 @@ import { MaxWidth } from '../MaxWidth/MaxWidth';
  */
 
 export const Navbar = () => {
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
     return (
         <header className='navbar'>
             <MaxWidth>
