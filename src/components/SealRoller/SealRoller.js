@@ -60,19 +60,34 @@ export const SealRoller = () => {
 
     // Mouse tracking
     useEffect(() => {
-        const handleMouseMove = (event) => {
+        const handlePointer = (clientX, clientY) => {
             if (!sectionRef.current) return;
             const rect = sectionRef.current.getBoundingClientRect();
-            const x = event.clientX - rect.left - sealSize / 2;
-            const y = event.clientY - rect.top - sealSize / 2;
+            const x = clientX - rect.left - sealSize / 2;
+            const y = clientY - rect.top - sealSize / 2;
 
             if (x >= 0 && x <= rect.width - sealSize && y >= 0 && y <= rect.height - sealSize) {
                 targetPositionRef.current = { x: x, y: y };
             }
         };
 
+        const handleMouseMove = (event) => {
+            handlePointer(event.clientX, event.clientY);
+        }
+        const handleTouchMove = (event) => {
+            const touch = event.touches[0];
+            handlePointer(touch.clientX, touch.clientY);
+            // Stop page from scrolling during touch interaction
+            event.preventDefault();
+        }
+
         window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
+        window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('touchmove', handleTouchMove);
+        }
     }, []);
 
     // Movement animation loop
@@ -137,6 +152,36 @@ export const SealRoller = () => {
             ballVelocity.x *= 0.94;
             ballVelocity.y *= 0.94;
 
+            // Collision with seal detection logic
+            const sealCenterX = seal.x + sealSize * 0.5;
+            const sealCenterY = seal.y + sealSize * 0.5;
+            const ballCenterX = ball.x + snowballSize * 0.5;
+            const ballCenterY = ball.y + snowballSize * 0.5;
+
+            // Distance between seal and snowball centers
+            const cx = ballCenterX - sealCenterX;
+            const cy = ballCenterY - sealCenterY;
+            const dist = Math.sqrt(cx * cx + cy * cy);
+            const minDist = sealSize * 0.45 + snowballSize * 0.5;
+
+            // Check for collision
+            if (dist < minDist) {
+                // Normalize collision direction
+                const nx = cx / (dist || 1);
+                const ny = cy / (dist || 1);
+
+                // Prevent snowball from getting stuck under the seal
+                const pushAmount = minDist - dist;
+                ball.x += nx * pushAmount;
+                ball.y += ny * pushAmount;
+
+                const sealSpeed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y);
+                const impulse = Math.min(sealSpeed * 0.3, 6);
+
+                ballVelocity.x += nx * impulse;
+                ballVelocity.y += ny * impulse;
+            }
+
             // Check bounds of snowball, bouncing off walls
             if (sectionRef.current) {
                 const rect = sectionRef.current.getBoundingClientRect();
@@ -161,31 +206,6 @@ export const SealRoller = () => {
                     ball.y = rect.height - snowballSize;
                     ballVelocity.y = -ballVelocity.y;
                 }
-            }
-
-            // Collision detection logic
-            const sealBox = {
-                x: seal.x,
-                y: seal.y,
-                w: sealSize - 10,
-                h: sealSize - 10
-            };
-            const ballBox = {
-                x: ball.x,
-                y: ball.y,
-                w: snowballSize,
-                h: snowballSize
-            };
-            // Check when seal and snowball overlap
-            if (
-                sealBox.x < ballBox.x + ballBox.w &&
-                sealBox.x + sealBox.w > ballBox.x &&
-                sealBox.y < ballBox.y + ballBox.h &&
-                sealBox.y + sealBox.h > ballBox.y
-            ) {
-                // Give ball some velocity in the seal's direction
-                ballVelocity.x = velocity.x * speed * 2;
-                ballVelocity.y = velocity.y * speed * 2;
             }
 
             // Set snowball position
