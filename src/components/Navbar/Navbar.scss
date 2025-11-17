@@ -73,6 +73,10 @@
             display: block;
         }
 
+        .nav-link {
+            font-size: 1.5rem;
+        }
+
         .navbar-links {
             position: absolute;
             top: 50px;
@@ -88,7 +92,7 @@
                 flex-direction: column;
                 padding: 1rem 0;
                 gap: 1.2rem;
-                text-align: center;
+                text-align: right;
             }
         }
 

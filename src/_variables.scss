@@ -21,16 +21,9 @@ $Brown: #907c7cff;
     margin: 0;
 }
 
-html {
-    @media (max-width: 500px) {
-        font-size: 12px;
-    }
-}
-
-
 p {
     font-family: $font-body;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: $Brown;
 }
 
@@ -49,7 +42,7 @@ h1 {
 }
 
 h2 {
-    font-size: 3.5rem;
+    font-size: 3rem;
     color: $DeepBlue;
     padding-left: 3rem;
 }
