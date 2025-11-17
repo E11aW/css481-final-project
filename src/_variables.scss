@@ -21,6 +21,13 @@ $Brown: #907c7cff;
     margin: 0;
 }
 
+html {
+    @media (max-width: 500px) {
+        font-size: 12px;
+    }
+}
+
+
 p {
     font-family: $font-body;
     font-size: 1.5rem;

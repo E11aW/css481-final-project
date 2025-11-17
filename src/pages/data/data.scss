@@ -2,54 +2,53 @@
 
 
 .data-page {
-padding: 24px;
-max-width: 1200px;
-margin: 0 auto;
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 
 .data-page__header {
-border: 2px solid $DeepBlue;
-border-radius: 16px;
-background: $OffWhite;
-padding: 20px;
-margin-bottom: 20px;
+    border: 2px solid $DeepBlue;
+    border-radius: 16px;
+    background: $OffWhite;
+    padding: 20px;
+    margin-bottom: 20px;
 }
 
 
 .data-page__header h1 {
-font-family: $font-heading;
-color: $DeepBlue;
-font-size: 3rem;
-line-height: 1.1;
-margin: 0 0 10px 0;
-text-transform: uppercase;
-text-align: left;
+    font-family: $font-heading;
+    color: $DeepBlue;
+    font-size: 3rem;
+    line-height: 1.1;
+    margin: 0 0 10px 0;
+    text-transform: uppercase;
+    text-align: left;
 }
 
 
 .data-page__intro {
-font-family: $font-body;
-color: $Brown;
-font-size: 1rem;
+    font-family: $font-body;
+    color: $Brown;
 }
 
 
 .data-page__content {
-display: grid;
-grid-template-columns: 1fr;
-gap: 16px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
 
 
-@media (min-width: 900px) {
-grid-template-columns: 1fr 1fr;
-}
+    @media (min-width: 1000px) {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 
 .data-page__card {
-border: 2px solid $DeepBlue;
-border-radius: 16px;
-background: $OffWhite;
-padding: 12px;
+    border: 2px solid $DeepBlue;
+    border-radius: 16px;
+    background: $OffWhite;
+    padding: 12px;
 }
