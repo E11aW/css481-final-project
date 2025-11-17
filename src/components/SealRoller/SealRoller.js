@@ -71,15 +71,28 @@ export const SealRoller = () => {
             }
         };
 
-        const handleMouseMove = (event) => {
-            handlePointer(event.clientX, event.clientY);
-        }
+        // Used by mobile movement to allow for screen scrolling outside rolling seal section
+        const isInsideSection = (clientX, clientY) => {
+            if (!sectionRef.current) return false;
+            const rect = sectionRef.current.getBoundingClientRect();
+            return (
+                clientX >= rect.left && clientX <= rect.right &&
+                clientY >= rect.top && clientY <= rect.bottom
+            );
+        };
+
         const handleTouchMove = (event) => {
             const touch = event.touches[0];
-            handlePointer(touch.clientX, touch.clientY);
-            // Stop page from scrolling during touch interaction
-            event.preventDefault();
-        }
+            if (isInsideSection(touch.clientX, touch.clientY)) {
+
+                handlePointer(touch.clientX, touch.clientY);
+                // Stop page from scrolling inside the section
+                event.preventDefault();
+            }
+        };
+        const handleMouseMove = (event) => {
+            handlePointer(event.clientX, event.clientY);
+        };
 
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('touchmove', handleTouchMove, { passive: false });
