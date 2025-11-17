@@ -2,6 +2,7 @@ import './Navbar.scss';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { MaxWidth } from '../MaxWidth/MaxWidth';
+import Iceberg from '../../assets/Home/iceberg.png'
 
 /** 
  * Navbar component that renders links to each subpage
@@ -15,7 +16,26 @@ export const Navbar = () => {
         <header className='navbar'>
             <MaxWidth>
                 <div className='navbar-row'>
-                    <nav className='navbar-links' aria-label='Primary Navigation'>
+                    <div className='logo'>
+                        <NavLink to='/' aria-label='Go to Homepage'>
+                            <img className='logo-image' src={Iceberg} alt='iceberg logo' />
+                        </NavLink>
+                    </div>
+                    {/* Drop down icon for mobile */}
+                    <button
+                        className={`dropdown ${dropdownOpen ? 'open' : ''}`}
+                        aria-label='Toggle Dropdown'
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                    >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    {/* Normal navbar links */}
+                    <nav
+                        className={`navbar-links ${dropdownOpen ? 'open' : ''}`}
+                        aria-label='Primary Navigation'
+                    >
                         <ul className='link-list'>
                             <li>
                                 <NavLink

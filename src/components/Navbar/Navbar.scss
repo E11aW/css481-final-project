@@ -14,10 +14,15 @@
 
     .navbar-row {
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
         align-items: center;
         height: 5rem;
         width: 100%;
+
+        .logo-image {
+            height: 75px;
+            width: auto;
+        }
     }
 
     .navbar-links {
@@ -40,6 +45,67 @@
         &:hover {
             text-decoration: underline;
             color: $White;
+        }
+    }
+
+    // dropdown menu that is hidden on desktop
+    .dropdown {
+        display: none;
+        background: none;
+        border: none;
+        padding: 0.3rem;
+        cursor: pointer;
+
+        span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            margin: 5px;
+            background: white;
+            transition: 0.3s;
+        }
+    }
+
+    // Styles for mobile
+    @media (max-width: 800px) {
+        .dropdown {
+            display: block;
+        }
+
+        .navbar-links {
+            position: absolute;
+            top: 70px;
+            right: 0;
+            padding: 0.5rem;
+            // width: 100%;
+            background-color: $DeepBlue;
+
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+
+            .link-list {
+                flex-direction: column;
+                padding: 1rem 0;
+                gap: 1.2rem;
+                text-align: center;
+            }
+        }
+
+        .navbar-links.open {
+            max-height: 300px;
+        }
+
+        .dropdown.open span:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+
+        .dropdown.open span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .dropdown.open span:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
         }
     }
 }
