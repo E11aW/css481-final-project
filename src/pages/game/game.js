@@ -35,6 +35,7 @@ export const Game = () => {
     const ctx = canvas.getContext("2d", { alpha: false });
     const jumpStrength = -16;
     let gameState = "start"; // "start", "playing", "gameover"
+    let gameMode = "full"; // "full" or "demo"
     let elapsed = 0;
 
     // ----- Sizing -----
@@ -82,6 +83,21 @@ export const Game = () => {
     let scroll = 0;
     const scrollSpeed = 2.0;
     const baseGroundY = H * 0.72;
+    
+    // Mode-dependent constants
+    let MAX_DISTANCE = 200; // meters - if seal travels this far without winning, ice melts and seal dies
+    let coinSpawnIntervalBase = 6.0; // spawn interval (seconds)
+    
+    const setGameMode = (mode) => {
+      gameMode = mode;
+      if (mode === "demo") {
+        MAX_DISTANCE = 50;
+        coinSpawnIntervalBase = 3.0; // faster spawn for demo
+      } else {
+        MAX_DISTANCE = 200;
+        coinSpawnIntervalBase = 6.0;
+      }
+    };
     
     // restore to original speed for seal movement
     const actualScrollSpeed = 1.8;
@@ -137,9 +153,12 @@ export const Game = () => {
     let coins = [];
     let coinsCollected = 0;
     let lastCoinSpawn = 0;
-    const coinSpawnInterval = 6.0; // spawn every 6 seconds (much less frequent, max 1 on screen)
+    let coinSpawnInterval = 6.0; // will be updated by mode
     const coinRadius = 12;
     let factsShown = new Set(); // track which facts have been shown
+    
+    // Demo mode facts (first 3 facts)
+    const DEMO_FACTS = CLIMATE_FACTS.slice(0, 3);
 
     const spawnCoin = () => {
       // spawn coins at the right edge of the screen (new terrain appearing)
@@ -213,34 +232,43 @@ export const Game = () => {
 
     // Start Button
       canvas.addEventListener("click", (e) => {
-        if(gameState !== "start" && gameState !== "gameover") return;
+        if(gameState !== "start" && gameState !== "gameover" && gameState !== "gameover-loss") return;
 
         const rect = canvas.getBoundingClientRect();
         const mx = (e.clientX - rect.left) * (canvas.width / rect.width) / (window.devicePixelRatio || 1);
         const my = (e.clientY - rect.top) * (canvas.height / rect.height) / (window.devicePixelRatio || 1);
 
+        // Check Start Game Button (full mode)
         if(mx >= startBtn.x && mx <= startBtn.x + startBtn.w &&
            my >= startBtn.y && my <= startBtn.y + startBtn.h) {
-          if(gameState === "gameover") {
-            restart();
+          if(gameState === "gameover" || gameState === "gameover-loss") {
+            restart("full");
           } else {
-            gameState = "playing";
-            scroll = 0;
-            elapsed = 0;
+            restart("full");
           }
+        }
+        
+        // Check Demo Mode Button
+        if(gameState === "start" &&
+           mx >= demoBtn.x && mx <= demoBtn.x + demoBtn.w &&
+           my >= demoBtn.y && my <= demoBtn.y + demoBtn.h) {
+          restart("demo");
         }
       });
       
-      //Hover effect for start button
+      //Hover effect for buttons
       canvas.addEventListener("mousemove", (e) => {
-        if(gameState !== "start" && gameState !== "gameover") return;
+        if(gameState !== "start" && gameState !== "gameover" && gameState !== "gameover-loss") return;
         const rect = canvas.getBoundingClientRect();
         const mx = (e.clientX - rect.left) * (canvas.width / rect.width) / (window.devicePixelRatio || 1);
         const my = (e.clientY - rect.top) * (canvas.height / rect.height) / (window.devicePixelRatio || 1);
         startBtn.hover = 
           mx >= startBtn.x && mx <= startBtn.x + startBtn.w &&
           my >= startBtn.y && my <= startBtn.y + startBtn.h;
-        canvas.style.cursor = startBtn.hover ? "pointer" : "default";
+        demoBtn.hover = gameState === "start" &&
+          mx >= demoBtn.x && mx <= demoBtn.x + demoBtn.w &&
+          my >= demoBtn.y && my <= demoBtn.y + demoBtn.h;
+        canvas.style.cursor = (startBtn.hover || demoBtn.hover) ? "pointer" : "default";
       });
 
     // ----- Game state -----
@@ -259,7 +287,9 @@ export const Game = () => {
       }
     };
 
-    const restart = () => {
+    const restart = (mode = "full") => {
+      setGameMode(mode);
+      coinSpawnInterval = coinSpawnIntervalBase;
       scroll = 0;
       seal.y = baseGroundY - 24;
       seal.vy = 0;
@@ -297,6 +327,12 @@ export const Game = () => {
       if (gameState === "playing") {
         // world scroll (visual movement) keeps original speed
         scroll += actualScrollSpeed * fpsScale;
+
+        // check if seal has traveled too far (ice has melted)
+        const currentDistance = Math.floor(scroll * meterCountDivisor);
+        if (currentDistance >= MAX_DISTANCE) {
+          gameState = "gameover-loss"; // trigger loss state
+        }
 
         // smoother physics parameters
         const G = 0.9; // gravity per 60fps
@@ -372,8 +408,9 @@ export const Game = () => {
           if (dist < seal.r + coin.r) {
             // collision!
             coins.splice(idx, 1);
-            // show a random fact
-            const randomFact = CLIMATE_FACTS[Math.floor(Math.random() * CLIMATE_FACTS.length)];
+            // get the correct facts array based on game mode
+            const factsArray = gameMode === "demo" ? DEMO_FACTS : CLIMATE_FACTS;
+            const randomFact = factsArray[Math.floor(Math.random() * factsArray.length)];
             
             // only count if fact hasn't been shown before
             if (!factsShown.has(randomFact)) {
@@ -381,7 +418,7 @@ export const Game = () => {
               coinsCollected++;
               
               // check if all facts have been shown (win condition)
-              if (factsShown.size === CLIMATE_FACTS.length) {
+              if (factsShown.size === factsArray.length) {
                 gameState = "gameover"; // trigger win state
               }
             }
@@ -399,7 +436,8 @@ export const Game = () => {
       // Update score
       if(scoreDisplay && gameState === "playing") {
         const distance = Math.floor(scroll * meterCountDivisor);
-        scoreDisplay.textContent = `${distance} m | � ${coinsCollected}/${CLIMATE_FACTS.length}`;
+        const factsArray = gameMode === "demo" ? DEMO_FACTS : CLIMATE_FACTS;
+        scoreDisplay.textContent = `${distance}m / ${MAX_DISTANCE}m | 📚 ${coinsCollected}/${factsArray.length}`;
         // show hold button during gameplay
         if(touchBtn) touchBtn.style.display = "flex";
       } else if(gameState === "start") {
@@ -407,13 +445,19 @@ export const Game = () => {
         // hide hold button on start screen
         if(touchBtn) touchBtn.style.display = "none";
       } else if(gameState === "gameover") {
-        scoreDisplay.textContent = `You collected all ${coinsCollected} facts! 🎉`;
+        scoreDisplay.textContent = `🎉 You Won! All ${coinsCollected} facts learned!`;
         // hide hold button on win screen
+        if(touchBtn) touchBtn.style.display = "none";
+      } else if(gameState === "gameover-loss") {
+        const distance = Math.floor(scroll * meterCountDivisor);
+        scoreDisplay.textContent = `❄️ Game Over - Ice melted at ${distance}m! Learn all facts before 200m!`;
+        // hide hold button on loss screen
         if(touchBtn) touchBtn.style.display = "none";
       }
     };
 
-    const startBtn = {x: 0, y: 0, w: 200, h: 60};
+    const startBtn = {x: 0, y: 0, w: 200, h: 60, hover: false};
+    const demoBtn = {x: 0, y: 0, w: 200, h: 60, hover: false};
   let sealBobY = 0;
 
     // ----- Draw Start Screen -----
@@ -451,10 +495,9 @@ export const Game = () => {
       ctx.textAlign = "center";
       ctx.fillText("Save The Seal", W / 2, H / 2 - 100);
 
-      // Start Button (start screen)
-      startBtn.x = W / 2 - startBtn.w / 2;
+      // Start Game Button (left)
+      startBtn.x = W / 2 - startBtn.w - 20;
       startBtn.y = H / 2 + 60 - startBtn.h / 2;
-      // Animation to add hover pulse to start button
       let hoverScale = 1;
       if(startBtn.hover) {
         hoverScale += 0.05 * Math.sin(elapsed * 10);
@@ -474,6 +517,27 @@ export const Game = () => {
       ctx.fillText("Start Game", 0, 8);
       ctx.restore();
 
+      // Demo Mode Button (right)
+      demoBtn.x = W / 2 + 20;
+      demoBtn.y = H / 2 + 60 - demoBtn.h / 2;
+      hoverScale = 1;
+      if(demoBtn.hover) {
+        hoverScale += 0.05 * Math.sin(elapsed * 10);
+      }
+      ctx.save();
+      ctx.translate(demoBtn.x + demoBtn.w / 2, demoBtn.y + demoBtn.h / 2);
+      ctx.scale(hoverScale, hoverScale);
+      ctx.fillStyle = demoBtn.hover ? "#d97706" : "#92400e";
+      ctx.beginPath();
+      ctx.roundRect(-demoBtn.w / 2, -demoBtn.h / 2, demoBtn.w, demoBtn.h, 12);
+      ctx.shadowColor = demoBtn.hover ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.1)";
+      ctx.shadowBlur = demoBtn.hover ? 16 : 8;
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "24px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Demo (3 facts)", 0, 8);
+      ctx.restore();
 
       
       // Draw Clouds (start screen)
@@ -561,6 +625,84 @@ export const Game = () => {
       }
     };
 
+    // ----- Draw Loss Screen -----
+    const drawLossScreen = () => {
+      // Clear background with icy blue
+      ctx.fillStyle = '#a8d8ff';
+      ctx.fillRect(0, 0, W, H);
+      
+      // Draw melting ice effect (semi-transparent white overlay)
+      ctx.fillStyle = 'rgba(220, 240, 255, 0.6)';
+      ctx.fillRect(0, 0, W, H);
+      
+      // Draw clouds (loss screen)
+      clouds.forEach(cloud => {
+        cloud.x -= cloud.speed * 2;
+        if(cloud.x < -80) {
+          cloud.x = W + 80;
+          cloud.y = 60 + Math.random() * 80;
+        }
+        drawCloud(cloud.x, cloud.y);
+      });
+
+      // Sad Seal (loss screen)
+      sealBobY = Math.sin(elapsed * 2) * 3; // slower bob
+      if(spritesLoad) {
+        ctx.save();
+        ctx.translate(W/2, H/2 - 60 + sealBobY);
+        ctx.globalAlpha = 0.7; // faded seal
+        const drawH = seal.r * 2 * 2.0;
+        const drawW = drawH * sealRatio;
+        ctx.drawImage(sealSprite, -drawW / 2, -drawH / 2, drawW, drawH);
+        ctx.drawImage(sealSprite, -drawW / 2, -drawH / 2, drawW, drawH);
+        ctx.globalAlpha = 1.0;
+        ctx.restore();
+      }
+
+      // Title (loss screen)
+      ctx.fillStyle = "#06414a";
+      ctx.font = "48px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("❄️ Ice Melted! ❄️", W / 2, H / 2 - 100);
+
+      // Subtitle
+      ctx.fillStyle = "#c41e3a";
+      ctx.font = "24px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      ctx.fillText("Learn all climate facts before the ice melts!", W / 2, H / 2 - 20);
+
+      // Restart Button (loss screen)
+      startBtn.x = W / 2 - startBtn.w / 2;
+      startBtn.y = H / 2 + 60 - startBtn.h / 2;
+      let hoverScale = 1;
+      if(startBtn.hover) {
+        hoverScale += 0.05 * Math.sin(elapsed * 10);
+      }
+      ctx.save();
+      ctx.translate(startBtn.x + startBtn.w / 2, startBtn.y + startBtn.h / 2);
+      ctx.scale(hoverScale, hoverScale);
+      ctx.fillStyle = startBtn.hover ? "#c41e3a" : "#8b1428";
+      ctx.beginPath();
+      ctx.roundRect(-startBtn.w / 2, -startBtn.h / 2, startBtn.w, startBtn.h, 12);
+      ctx.shadowColor = startBtn.hover ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.1)";
+      ctx.shadowBlur = startBtn.hover ? 16 : 8;
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "24px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Try Again", 0, 8);
+      ctx.restore();
+
+      function drawCloud(x, y) {
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.ellipse(x, y, 30, 20, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + 25, y - 10, 30, 20, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + 50, y, 30, 20, 0, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+    };
+
     // ----- Draw -----
     const draw = () => {
       if(gameState === "start") {
@@ -570,6 +712,11 @@ export const Game = () => {
       
       if(gameState === "gameover") {
         drawWinScreen();
+        return;
+      }
+
+      if(gameState === "gameover-loss") {
+        drawLossScreen();
         return;
       }
 
@@ -698,6 +845,26 @@ export const Game = () => {
         ctx.fillText(line1.trim(), W / 2, boxY + boxHeight / 2 - 20);
         ctx.fillText(line2.trim(), W / 2, boxY + boxHeight / 2 + 20);
         ctx.restore();
+      }
+
+      // Distance warning indicator (red overlay that intensifies as seal approaches 200m)
+      const distance = Math.floor(scroll * meterCountDivisor);
+      const distancePercent = distance / MAX_DISTANCE;
+      if (distancePercent > 0.5) {
+        // Warn when past 50%
+        const warningIntensity = Math.max(0, (distancePercent - 0.5) * 2); // 0 to 1
+        ctx.fillStyle = `rgba(196, 30, 58, ${0.15 * warningIntensity})`;
+        ctx.fillRect(0, 0, W, H);
+        
+        // Add warning text when past 75%
+        if (distancePercent > 0.75) {
+          ctx.save();
+          ctx.fillStyle = `rgba(196, 30, 58, ${0.7 * (distancePercent - 0.75) * 4})`;
+          ctx.font = "bold 36px 'Segoe UI', sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("⚠️ ICE MELTING! ⚠️", W / 2, 80);
+          ctx.restore();
+        }
       }
 
 
