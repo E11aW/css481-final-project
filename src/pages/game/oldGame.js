@@ -4,6 +4,24 @@ import "./game.scss";
 import sealSpriteSrc from '../../assets/Game/SealSprite.png';
 import rollSpriteSrc from '../../assets/Game/RollSprite.png';
 
+// Climate & seal fun facts
+const CLIMATE_FACTS = [
+  "🌍 Seals rely on sea ice for resting and raising pups. Climate warming reduces their habitat!",
+  "❄️ Arctic sea ice is declining ~13% per decade. Seals need it to survive.",
+  "🦭 A seal's blubber can be up to 1.5 inches thick, keeping them warm in cold water.",
+  "🌊 Rising ocean temperatures are making seal hunting grounds disappear faster.",
+  "🐟 Seals eat 5-7 pounds of fish per day. Overfishing threatens their food supply.",
+  "🌡️ The Arctic is warming 2-3x faster than the rest of the planet!",
+  "🦭 Seals can dive over 600 meters deep and hold their breath for 30 minutes!",
+  "💨 Climate change is causing stronger storms, making it harder for seals to rest.",
+  "🌊 Melting glaciers change ocean currents seals depend on for navigation.",
+  "🦭 Baby seals depend on sea ice platforms to nurse for 4-6 weeks.",
+  "📉 Some seal populations have declined by 80% due to climate change.",
+  "☀️ Seals regulate body temperature through their thick fur and blubber layer.",
+  "🌍 Ocean acidification from CO₂ is affecting fish populations seals eat.",
+  "🧊 Seals haul out on ice to rest, breed, and escape predators.",
+];
+
 export const Game = () => {
   const canvasRef = useRef(null);
   const scoreRef = useRef(null);
@@ -21,21 +39,35 @@ export const Game = () => {
 
     // ----- Sizing -----
     let W = 800, H = 450; //used to be 800, 450
+    // Adding hold button within the canvas (declare early so resize can call it)
+    let holdBtn = {
+      x: 0, y: 0, w: 120, h: 60
+    };
+
+    const updateHoldBtnPosition = () => {
+      holdBtn.x = W / 2 - holdBtn.w / 2;
+      holdBtn.y = H - holdBtn.h - 60;
+    };
+
     const resize = () => {
       const dpr = Math.max(1, window.devicePixelRatio || 1);
+      const header = canvas.parentElement.querySelector('.gameHeader');
+      const headerHeight = header ? header.offsetHeight : 60;
       W = Math.max(700, window.innerWidth); 
-      H = Math.max(300, window.innerHeight-180); //used to be 320
+      H = Math.max(300, window.innerHeight - headerHeight);
       canvas.width = Math.floor(W * dpr);
       canvas.height = Math.floor(H * dpr);
       canvas.style.width = W + "px";
       canvas.style.height = H + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // update hold button drawing position on resize if helper exists
+      if (typeof updateHoldBtnPosition === 'function') updateHoldBtnPosition();
     };
     window.addEventListener("resize", resize);
     resize();
 
-    // ----- Start Screen Visuals -----
-    let clouds = [];
+  // ----- Start Screen Visuals -----
+  let clouds = [];
     for(let i = 0; i < 8; i++) {
       clouds.push({
         x: Math.random() * W + W,
@@ -44,25 +76,20 @@ export const Game = () => {
       });
     }
 
-    // Adding hold button within the canvas
-    let holdBtn = {
-      x: 0, y: 0, w: 120, h: 60
-    };
-
-    const updateHoldBtnPosition = () => {
-      holdBtn.x = W / 2 - holdBtn.w / 2;
-      holdBtn.y = H - holdBtn.h - 20;
-    };
     updateHoldBtnPosition();
 
     // ----- World & Terrain -----
     let scroll = 0;
-    const scrollSpeed = 1.8;
+    const scrollSpeed = 2.0;
     const baseGroundY = H * 0.72;
+    
+    // restore to original speed for seal movement
+    const actualScrollSpeed = 1.8;
+    const meterCountDivisor = 0.01; // slow down meter counting without affecting seal movement
     const groundYAt = (worldX) => {
-      const a = Math.sin(worldX * 0.004) * 60;
-      const b = Math.sin(worldX * 0.012 + 1.2) * 30;
-      const c = Math.sin(worldX * 0.03 + 0.3) * 12;
+      const a = Math.sin(worldX * 0.004) * 40;
+      const b = Math.sin(worldX * 0.012 + 1.2) * 20;
+      const c = Math.sin(worldX * 0.03 + 0.3) * 8;
       return baseGroundY + a + b + c;
     };
 
@@ -79,11 +106,26 @@ export const Game = () => {
     const sealSprite = new Image();
     const rollSprite = new Image();
     let spritesLoad = false;
+  let sealRatio = 1;
+  let rollRatio = 1;
 
     let loadedCount = 0;
     const onSpriteLoad = () => {
       loadedCount++;
-      if (loadedCount === 2) spritesLoad = true;
+      if (loadedCount === 2) {
+        spritesLoad = true;
+        // compute natural aspect ratios so we don't stretch sprites
+        try {
+          sealRatio = sealSprite.naturalWidth / sealSprite.naturalHeight || 1;
+        } catch (e) {
+          sealRatio = 1;
+        }
+        try {
+          rollRatio = rollSprite.naturalWidth / rollSprite.naturalHeight || 1;
+        } catch (e) {
+          rollRatio = 1;
+        }
+      }
     };
     sealSprite.onload = onSpriteLoad;
     rollSprite.onload = onSpriteLoad;
@@ -91,9 +133,34 @@ export const Game = () => {
     sealSprite.src = sealSpriteSrc;
     rollSprite.src = rollSpriteSrc;
 
-    let gravityNormal = 0.42;
-    let gravityPressed = 2.6;
-    let gravity = gravityNormal;
+    // ----- Coin System -----
+    let coins = [];
+    let coinsCollected = 0;
+    let lastCoinSpawn = 0;
+    const coinSpawnInterval = 6.0; // spawn every 6 seconds (much less frequent, max 1 on screen)
+    const coinRadius = 12;
+    let factsShown = new Set(); // track which facts have been shown
+
+    const spawnCoin = () => {
+      // spawn coins at the right edge of the screen (new terrain appearing)
+      const screenRightWorldX = scroll + W; // right edge of visible screen in world space
+      const worldX = screenRightWorldX + Math.random() * 60 - 30; // slight variation around right edge
+      const groundY = groundYAt(worldX);
+      const y = groundY - (Math.random() * 80 + 60); // 60-140 units above ground
+      coins.push({
+        x: worldX,
+        y: y,
+        r: coinRadius,
+        collected: false
+      });
+    };
+
+    // ----- Fact Display -----
+    let displayedFact = null;
+    let factDisplayTime = 0;
+    const factDisplayDuration = 3.5; // show fact for 3.5 seconds
+
+  // gravity is handled inside update() now with frame-rate scaling
 
     // ----- Controls -----
     let pressed = false;
@@ -140,11 +207,13 @@ export const Game = () => {
       window.addEventListener("mouseup", mouseUp);
       touchBtn.addEventListener("touchstart", touchStart, { passive: false });
       window.addEventListener("touchend", touchEnd);
+      // hide hold button until game starts
+      touchBtn.style.display = "none";
     }
 
     // Start Button
       canvas.addEventListener("click", (e) => {
-        if(gameState !== "start") return;
+        if(gameState !== "start" && gameState !== "gameover") return;
 
         const rect = canvas.getBoundingClientRect();
         const mx = (e.clientX - rect.left) * (canvas.width / rect.width) / (window.devicePixelRatio || 1);
@@ -152,15 +221,19 @@ export const Game = () => {
 
         if(mx >= startBtn.x && mx <= startBtn.x + startBtn.w &&
            my >= startBtn.y && my <= startBtn.y + startBtn.h) {
-          gameState = "playing";
-          scroll = 0;
-          elapsed = 0;
+          if(gameState === "gameover") {
+            restart();
+          } else {
+            gameState = "playing";
+            scroll = 0;
+            elapsed = 0;
+          }
         }
       });
       
       //Hover effect for start button
       canvas.addEventListener("mousemove", (e) => {
-        if(gameState !== "start") return;
+        if(gameState !== "start" && gameState !== "gameover") return;
         const rect = canvas.getBoundingClientRect();
         const mx = (e.clientX - rect.left) * (canvas.width / rect.width) / (window.devicePixelRatio || 1);
         const my = (e.clientY - rect.top) * (canvas.height / rect.height) / (window.devicePixelRatio || 1);
@@ -194,6 +267,12 @@ export const Game = () => {
       lastTs = performance.now();
       running = true;
       pauseBtn.textContent = "⏸️";
+      coins = [];
+      coinsCollected = 0;
+      displayedFact = null;
+      factDisplayTime = 0;
+      factsShown.clear();
+      gameState = "playing";
     };
 
     pauseBtn.addEventListener("click", togglePause);
@@ -201,12 +280,36 @@ export const Game = () => {
 
     // ----- Update / Physics -----
     const update = (dt) => {
-      if (gameState === "playing") {
-        scroll += scrollSpeed * (60 * dt);
+      // scale so physics stays consistent across frame rates
+      const fpsScale = Math.min(60 * dt, 3);
 
-        gravity = pressed ? gravityPressed : gravityNormal;
-        seal.vy += gravity;
-        seal.y += seal.vy;
+      // pause game while fact is displayed
+      if (displayedFact !== null) {
+        // only update fact display timer, don't update game physics
+        factDisplayTime += dt;
+        if (factDisplayTime >= factDisplayDuration) {
+          displayedFact = null;
+        }
+        elapsed += dt;
+        return; // skip all other updates
+      }
+
+      if (gameState === "playing") {
+        // world scroll (visual movement) keeps original speed
+        scroll += actualScrollSpeed * fpsScale;
+
+        // smoother physics parameters
+        const G = 0.9; // gravity per 60fps
+        const MAX_FALL = 18;
+        const AIR_DRAG = 0.995;
+
+        // apply gravity and integrate velocity/position with scaling
+        seal.vy += G * fpsScale;
+        // clamp fall speed
+        if (seal.vy > MAX_FALL) seal.vy = MAX_FALL;
+        // apply air drag when in the air
+        if (!seal.onGround) seal.vy *= Math.pow(AIR_DRAG, fpsScale);
+        seal.y += seal.vy * fpsScale;
 
         const worldX = seal.x + scroll;
         const groundY = groundYAt(worldX);
@@ -214,41 +317,79 @@ export const Game = () => {
         const slope = nextGroundY - groundY;
         const slopeAngle = Math.atan2(slope, 2);
 
-        // Game physics
-        if(seal.y + seal.r >= groundY) {
-          if(pressed) {
+        // ground collision & jumping
+        if (seal.y + seal.r >= groundY) {
+          // landed or standing on ground
+          if (pressed) {
+            // pressing keeps the seal grounded (rolling)
             seal.onGround = true;
             seal.y = groundY - seal.r;
             seal.vy = 0;
+            // slight speed tweak to follow slope
             scroll += Math.cos(slopeAngle) * scrollSpeed - scrollSpeed;
-          } else if(seal.onGround) {
+          } else if (seal.onGround) {
+            // initiate a smooth jump when leaving ground
             seal.onGround = false;
-            seal.vy = -6 - Math.max(0, Math.sin(slopeAngle) * 10); //purely from copilot
+            // use jumpStrength with a mild slope modifier
+            seal.vy = jumpStrength + Math.min(4, -Math.sin(slopeAngle) * 6);
           } else {
+            // landed from air
             seal.y = groundY - seal.r;
-            if(seal.vy > 0) seal.vy *= -0.25;
+            if (seal.vy > 0) seal.vy *= -0.18; // small bounce dampened
           }
         } else {
+          // in the air
           seal.onGround = false;
-          const glideGravity = 0.20;
-          const lift = Math.max(0, -Math.sin(slopeAngle) * seal.vy * 0.2); //copilot
-          seal.vy += glideGravity;
-          seal.y += seal.vy;
         }
 
-        if(seal.y + seal.r > groundYAt(worldX)) {
-          seal.y = groundYAt(worldX) - seal.r;
-          if(seal.vy > 0) seal.vy = 0;
-        }
-
-        if (justReleased) justReleased = false;
-
-
-
+        // keep the seal from going off the top
         if (seal.y < 8) {
           seal.y = 8;
           seal.vy = Math.max(seal.vy, 0);
         }
+
+        if (justReleased) justReleased = false;
+
+        // ----- Coin Spawning -----
+        lastCoinSpawn += dt;
+        if (lastCoinSpawn >= coinSpawnInterval) {
+          spawnCoin();
+          lastCoinSpawn = 0;
+        }
+
+        // ----- Coin Collision Detection -----
+        coins.forEach((coin, idx) => {
+          // remove coins that scroll off screen to the left
+          if (coin.x < scroll - 100) {
+            coins.splice(idx, 1);
+            return;
+          }
+          // check collision with seal (convert seal position to world space)
+          const sealWorldX = seal.x + scroll;
+          const dx = sealWorldX - coin.x;
+          const dy = seal.y - coin.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < seal.r + coin.r) {
+            // collision!
+            coins.splice(idx, 1);
+            // show a random fact
+            const randomFact = CLIMATE_FACTS[Math.floor(Math.random() * CLIMATE_FACTS.length)];
+            
+            // only count if fact hasn't been shown before
+            if (!factsShown.has(randomFact)) {
+              factsShown.add(randomFact);
+              coinsCollected++;
+              
+              // check if all facts have been shown (win condition)
+              if (factsShown.size === CLIMATE_FACTS.length) {
+                gameState = "gameover"; // trigger win state
+              }
+            }
+            
+            displayedFact = randomFact;
+            factDisplayTime = 0;
+          }
+        });
 
         elapsed += dt;
       } else if (gameState === "start") {
@@ -257,20 +398,26 @@ export const Game = () => {
       
       // Update score
       if(scoreDisplay && gameState === "playing") {
-        const distance = Math.floor(scroll);
-        scoreDisplay.textContent = `${distance} m`;
+        const distance = Math.floor(scroll * meterCountDivisor);
+        scoreDisplay.textContent = `${distance} m | � ${coinsCollected}/${CLIMATE_FACTS.length}`;
+        // show hold button during gameplay
+        if(touchBtn) touchBtn.style.display = "flex";
       } else if(gameState === "start") {
         scoreDisplay.textContent = `Press Space or Hold to Start`;
+        // hide hold button on start screen
+        if(touchBtn) touchBtn.style.display = "none";
+      } else if(gameState === "gameover") {
+        scoreDisplay.textContent = `You collected all ${coinsCollected} facts! 🎉`;
+        // hide hold button on win screen
+        if(touchBtn) touchBtn.style.display = "none";
       }
     };
 
     const startBtn = {x: 0, y: 0, w: 200, h: 60};
-    let sealBobY = 0;
-    let sealBobDir = 1;
-    let sealBobSpeed = 0.4;
+  let sealBobY = 0;
 
     // ----- Draw Start Screen -----
-    const drawStartScreen = () => {
+  const drawStartScreen = () => {
       // Clear background
       ctx.fillStyle = '#cbe2e8ff';
       ctx.fillRect(0, 0, W, H);
@@ -290,8 +437,9 @@ export const Game = () => {
       if(spritesLoad) {
         ctx.save();
         ctx.translate(W/2, H/2 - 60 + sealBobY);
-        const drawW = seal.r * 2 * 2.2;
-        const drawH = seal.r * 2 * 1.3;
+        // keep the sprite height similar to previous design but preserve aspect ratio (50% smaller: 2.6 / 2 = 1.3)
+        const drawH = seal.r * 2 * 2.0;
+        const drawW = drawH * sealRatio;
         ctx.drawImage(sealSprite, -drawW / 2, -drawH / 2, drawW, drawH);
         ctx.drawImage(sealSprite, -drawW / 2, -drawH / 2, drawW, drawH);
         ctx.restore();
@@ -340,12 +488,90 @@ export const Game = () => {
       }
     };
 
+    // ----- Draw Win Screen -----
+    const drawWinScreen = () => {
+      // Clear background
+      ctx.fillStyle = '#cbe2e8ff';
+      ctx.fillRect(0, 0, W, H);
+      
+      // Draw clouds (win screen)
+      clouds.forEach(cloud => {
+        cloud.x -= cloud.speed * 2;
+        if(cloud.x < -80) {
+          cloud.x = W + 80;
+          cloud.y = 60 + Math.random() * 80;
+        }
+        drawCloud(cloud.x, cloud.y);
+      });
+
+      // Seal Bobbing (win screen)
+      sealBobY = Math.sin(elapsed * 2) * 6;
+      if(spritesLoad) {
+        ctx.save();
+        ctx.translate(W/2, H/2 - 60 + sealBobY);
+        const drawH = seal.r * 2 * 2.0;
+        const drawW = drawH * sealRatio;
+        ctx.drawImage(sealSprite, -drawW / 2, -drawH / 2, drawW, drawH);
+        ctx.drawImage(sealSprite, -drawW / 2, -drawH / 2, drawW, drawH);
+        ctx.restore();
+      }
+
+      // Title (win screen)
+      ctx.fillStyle = "#06414a";
+      ctx.font = "48px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("🎉 You Won! 🎉", W / 2, H / 2 - 100);
+
+      // Subtitle
+      ctx.fillStyle = "#0a82b4";
+      ctx.font = "24px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      ctx.fillText("All climate facts learned!", W / 2, H / 2 - 20);
+
+      // Restart Button (win screen)
+      startBtn.x = W / 2 - startBtn.w / 2;
+      startBtn.y = H / 2 + 60 - startBtn.h / 2;
+      // Animation to add hover pulse to restart button
+      let hoverScale = 1;
+      if(startBtn.hover) {
+        hoverScale += 0.05 * Math.sin(elapsed * 10);
+      }
+      ctx.save();
+      ctx.translate(startBtn.x + startBtn.w / 2, startBtn.y + startBtn.h / 2);
+      ctx.scale(hoverScale, hoverScale);
+      ctx.fillStyle = startBtn.hover ? "#0a82b4" : "#0c3545ff";
+      ctx.beginPath();
+      ctx.roundRect(-startBtn.w / 2, -startBtn.h / 2, startBtn.w, startBtn.h, 12);
+      ctx.shadowColor = startBtn.hover ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.1)";
+      ctx.shadowBlur = startBtn.hover ? 16 : 8;
+      ctx.fill();
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "24px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Play Again", 0, 8);
+      ctx.restore();
+
+      function drawCloud(x, y) {
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.ellipse(x, y, 30, 20, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + 25, y - 10, 30, 20, 0, 0, Math.PI * 2);
+        ctx.ellipse(x + 50, y, 30, 20, 0, 0, Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+    };
+
     // ----- Draw -----
     const draw = () => {
       if(gameState === "start") {
         drawStartScreen();
         return;
-      } 
+      }
+      
+      if(gameState === "gameover") {
+        drawWinScreen();
+        return;
+      }
 
       // Clear background
       ctx.fillStyle = "#cfeefc";
@@ -400,11 +626,77 @@ export const Game = () => {
       if(spritesLoad) {
         const s = seal;
         const img = pressed ? rollSprite : sealSprite;
-        const drawW = s.r * 2 * 1.6;
-        const drawH = s.r * 2 * 1.0;
+        // keep the sprite at a consistent height and preserve its natural aspect ratio (50% smaller: 2.0 / 2 = 1.0)
+        const drawH = s.r * 2 * 1.25;
+        const ratio = pressed ? rollRatio : sealRatio;
+        const drawW = drawH * ratio;
         ctx.save();
         ctx.translate(s.x, s.y);
         ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+        ctx.restore();
+      }
+
+      // Draw Coins
+      coins.forEach(coin => {
+        const screenX = coin.x - scroll;
+        // only draw if on screen
+        if (screenX > -20 && screenX < W + 20) {
+          ctx.save();
+          ctx.translate(screenX, coin.y);
+          // glowing coin
+          ctx.fillStyle = "rgba(255, 215, 0, 0.3)";
+          ctx.beginPath();
+          ctx.arc(0, 0, coin.r * 1.5, 0, Math.PI * 2);
+          ctx.fill();
+          // main coin
+          ctx.fillStyle = "#FFD700";
+          ctx.beginPath();
+          ctx.arc(0, 0, coin.r, 0, Math.PI * 2);
+          ctx.fill();
+          // coin shine
+          ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+          ctx.beginPath();
+          ctx.arc(-coin.r * 0.3, -coin.r * 0.3, coin.r * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      });
+
+      // Draw Fact Display
+      if (displayedFact !== null) {
+        const alpha = Math.min(1, (factDisplayDuration - factDisplayTime) * 0.5); // fade out at end
+        ctx.save();
+        // semi-transparent background
+        ctx.fillStyle = `rgba(20, 100, 150, ${0.85 * alpha})`;
+        ctx.fillRect(0, 0, W, H);
+        // fact box
+        const boxWidth = Math.min(W * 0.8, 500);
+        const boxHeight = 140;
+        const boxX = (W - boxWidth) / 2;
+        const boxY = H / 2 - boxHeight / 2;
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+        // border
+        ctx.strokeStyle = `rgba(15, 154, 214, ${alpha})`;
+        ctx.lineWidth = 3;
+        ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+        // text
+        ctx.fillStyle = `rgba(6, 65, 74, ${alpha})`;
+        ctx.font = "bold 18px 'Segoe UI', sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        // wrap text to 2 lines max
+        const words = displayedFact.split(' ');
+        let line1 = '', line2 = '';
+        words.forEach((word, idx) => {
+          if (idx < Math.ceil(words.length / 2)) {
+            line1 += word + ' ';
+          } else {
+            line2 += word + ' ';
+          }
+        });
+        ctx.fillText(line1.trim(), W / 2, boxY + boxHeight / 2 - 20);
+        ctx.fillText(line2.trim(), W / 2, boxY + boxHeight / 2 + 20);
         ctx.restore();
       }
 
