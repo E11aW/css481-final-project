@@ -115,9 +115,7 @@ export const Game = () => {
     sealSprite.src = sealSpriteSrc;
     rollSprite.src = rollSpriteSrc;
 
-    let gravityNormal = 0.42;
-    let gravityPressed = 2.6;
-    let gravity = gravityNormal;
+  // gravity is handled inside update() now with frame-rate scaling
 
     // ----- Controls -----
     let pressed = false;
@@ -227,12 +225,25 @@ export const Game = () => {
 
     // ----- Update / Physics -----
     const update = (dt) => {
-      if (gameState === "playing") {
-        scroll += actualScrollSpeed * (60 * dt);
+      // scale so physics stays consistent across frame rates
+      const fpsScale = Math.min(60 * dt, 3);
 
-        gravity = pressed ? gravityPressed : gravityNormal;
-        seal.vy += gravity;
-        seal.y += seal.vy;
+      if (gameState === "playing") {
+        // world scroll (visual movement) keeps original speed
+        scroll += actualScrollSpeed * fpsScale;
+
+        // smoother physics parameters
+        const G = 0.9; // gravity per 60fps
+        const MAX_FALL = 18;
+        const AIR_DRAG = 0.995;
+
+        // apply gravity and integrate velocity/position with scaling
+        seal.vy += G * fpsScale;
+        // clamp fall speed
+        if (seal.vy > MAX_FALL) seal.vy = MAX_FALL;
+        // apply air drag when in the air
+        if (!seal.onGround) seal.vy *= Math.pow(AIR_DRAG, fpsScale);
+        seal.y += seal.vy * fpsScale;
 
         const worldX = seal.x + scroll;
         const groundY = groundYAt(worldX);
@@ -240,41 +251,38 @@ export const Game = () => {
         const slope = nextGroundY - groundY;
         const slopeAngle = Math.atan2(slope, 2);
 
-        // Game physics
-        if(seal.y + seal.r >= groundY) {
-          if(pressed) {
+        // ground collision & jumping
+        if (seal.y + seal.r >= groundY) {
+          // landed or standing on ground
+          if (pressed) {
+            // pressing keeps the seal grounded (rolling)
             seal.onGround = true;
             seal.y = groundY - seal.r;
             seal.vy = 0;
+            // slight speed tweak to follow slope
             scroll += Math.cos(slopeAngle) * scrollSpeed - scrollSpeed;
-          } else if(seal.onGround) {
+          } else if (seal.onGround) {
+            // initiate a smooth jump when leaving ground
             seal.onGround = false;
-            seal.vy = -6 - Math.max(0, Math.sin(slopeAngle) * 10); //purely from copilot
+            // use jumpStrength with a mild slope modifier
+            seal.vy = jumpStrength + Math.min(4, -Math.sin(slopeAngle) * 6);
           } else {
+            // landed from air
             seal.y = groundY - seal.r;
-            if(seal.vy > 0) seal.vy *= -0.25;
+            if (seal.vy > 0) seal.vy *= -0.18; // small bounce dampened
           }
         } else {
+          // in the air
           seal.onGround = false;
-          const glideGravity = 0.20;
-          seal.vy += glideGravity;
-          seal.y += seal.vy;
         }
 
-        if(seal.y + seal.r > groundYAt(worldX)) {
-          seal.y = groundYAt(worldX) - seal.r;
-          if(seal.vy > 0) seal.vy = 0;
-        }
-
-        if (justReleased) justReleased = false;
-
-
-
+        // keep the seal from going off the top
         if (seal.y < 8) {
           seal.y = 8;
           seal.vy = Math.max(seal.vy, 0);
         }
 
+        if (justReleased) justReleased = false;
         elapsed += dt;
       } else if (gameState === "start") {
         elapsed += dt * 0.5;
