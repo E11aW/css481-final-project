@@ -62,8 +62,12 @@ export const Game = () => {
 
     // ----- World & Terrain -----
     let scroll = 0;
-    const scrollSpeed = 1.8;
+    const scrollSpeed = 2.0;
     const baseGroundY = H * 0.72;
+    
+    // restore to original speed for seal movement
+    const actualScrollSpeed = 1.8;
+    const meterCountDivisor = 0.01; // slow down meter counting without affecting seal movement
     const groundYAt = (worldX) => {
       const a = Math.sin(worldX * 0.004) * 40;
       const b = Math.sin(worldX * 0.012 + 1.2) * 20;
@@ -224,7 +228,7 @@ export const Game = () => {
     // ----- Update / Physics -----
     const update = (dt) => {
       if (gameState === "playing") {
-        scroll += scrollSpeed * (60 * dt);
+        scroll += actualScrollSpeed * (60 * dt);
 
         gravity = pressed ? gravityPressed : gravityNormal;
         seal.vy += gravity;
@@ -278,7 +282,7 @@ export const Game = () => {
       
       // Update score
       if(scoreDisplay && gameState === "playing") {
-        const distance = Math.floor(scroll);
+        const distance = Math.floor(scroll * meterCountDivisor);
         scoreDisplay.textContent = `${distance} m`;
         // show hold button during gameplay
         if(touchBtn) touchBtn.style.display = "flex";
