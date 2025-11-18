@@ -21,35 +21,21 @@ export const Game = () => {
 
     // ----- Sizing -----
     let W = 800, H = 450; //used to be 800, 450
-    // Adding hold button within the canvas (declare early so resize can call it)
-    let holdBtn = {
-      x: 0, y: 0, w: 120, h: 60
-    };
-
-    const updateHoldBtnPosition = () => {
-      holdBtn.x = W / 2 - holdBtn.w / 2;
-      holdBtn.y = H - holdBtn.h - 60;
-    };
-
     const resize = () => {
       const dpr = Math.max(1, window.devicePixelRatio || 1);
-      const header = canvas.parentElement.querySelector('.gameHeader');
-      const headerHeight = header ? header.offsetHeight : 60;
       W = Math.max(700, window.innerWidth); 
-      H = Math.max(300, window.innerHeight - headerHeight);
+      H = Math.max(300, window.innerHeight-180); //used to be 320
       canvas.width = Math.floor(W * dpr);
       canvas.height = Math.floor(H * dpr);
       canvas.style.width = W + "px";
       canvas.style.height = H + "px";
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      // update hold button drawing position on resize if helper exists
-      if (typeof updateHoldBtnPosition === 'function') updateHoldBtnPosition();
     };
     window.addEventListener("resize", resize);
     resize();
 
-  // ----- Start Screen Visuals -----
-  let clouds = [];
+    // ----- Start Screen Visuals -----
+    let clouds = [];
     for(let i = 0; i < 8; i++) {
       clouds.push({
         x: Math.random() * W + W,
@@ -58,6 +44,15 @@ export const Game = () => {
       });
     }
 
+    // Adding hold button within the canvas
+    let holdBtn = {
+      x: 0, y: 0, w: 120, h: 60
+    };
+
+    const updateHoldBtnPosition = () => {
+      holdBtn.x = W / 2 - holdBtn.w / 2;
+      holdBtn.y = H - holdBtn.h - 20;
+    };
     updateHoldBtnPosition();
 
     // ----- World & Terrain -----
@@ -65,9 +60,9 @@ export const Game = () => {
     const scrollSpeed = 1.8;
     const baseGroundY = H * 0.72;
     const groundYAt = (worldX) => {
-      const a = Math.sin(worldX * 0.004) * 40;
-      const b = Math.sin(worldX * 0.012 + 1.2) * 20;
-      const c = Math.sin(worldX * 0.03 + 0.3) * 8;
+      const a = Math.sin(worldX * 0.004) * 60;
+      const b = Math.sin(worldX * 0.012 + 1.2) * 30;
+      const c = Math.sin(worldX * 0.03 + 0.3) * 12;
       return baseGroundY + a + b + c;
     };
 
@@ -84,26 +79,11 @@ export const Game = () => {
     const sealSprite = new Image();
     const rollSprite = new Image();
     let spritesLoad = false;
-  let sealRatio = 1;
-  let rollRatio = 1;
 
     let loadedCount = 0;
     const onSpriteLoad = () => {
       loadedCount++;
-      if (loadedCount === 2) {
-        spritesLoad = true;
-        // compute natural aspect ratios so we don't stretch sprites
-        try {
-          sealRatio = sealSprite.naturalWidth / sealSprite.naturalHeight || 1;
-        } catch (e) {
-          sealRatio = 1;
-        }
-        try {
-          rollRatio = rollSprite.naturalWidth / rollSprite.naturalHeight || 1;
-        } catch (e) {
-          rollRatio = 1;
-        }
-      }
+      if (loadedCount === 2) spritesLoad = true;
     };
     sealSprite.onload = onSpriteLoad;
     rollSprite.onload = onSpriteLoad;
@@ -160,8 +140,6 @@ export const Game = () => {
       window.addEventListener("mouseup", mouseUp);
       touchBtn.addEventListener("touchstart", touchStart, { passive: false });
       window.addEventListener("touchend", touchEnd);
-      // hide hold button until game starts
-      touchBtn.style.display = "none";
     }
 
     // Start Button
@@ -253,6 +231,7 @@ export const Game = () => {
         } else {
           seal.onGround = false;
           const glideGravity = 0.20;
+          const lift = Math.max(0, -Math.sin(slopeAngle) * seal.vy * 0.2); //copilot
           seal.vy += glideGravity;
           seal.y += seal.vy;
         }
@@ -280,20 +259,18 @@ export const Game = () => {
       if(scoreDisplay && gameState === "playing") {
         const distance = Math.floor(scroll);
         scoreDisplay.textContent = `${distance} m`;
-        // show hold button during gameplay
-        if(touchBtn) touchBtn.style.display = "flex";
       } else if(gameState === "start") {
         scoreDisplay.textContent = `Press Space or Hold to Start`;
-        // hide hold button on start screen
-        if(touchBtn) touchBtn.style.display = "none";
       }
     };
 
     const startBtn = {x: 0, y: 0, w: 200, h: 60};
-  let sealBobY = 0;
+    let sealBobY = 0;
+    let sealBobDir = 1;
+    let sealBobSpeed = 0.4;
 
     // ----- Draw Start Screen -----
-  const drawStartScreen = () => {
+    const drawStartScreen = () => {
       // Clear background
       ctx.fillStyle = '#cbe2e8ff';
       ctx.fillRect(0, 0, W, H);
@@ -313,9 +290,8 @@ export const Game = () => {
       if(spritesLoad) {
         ctx.save();
         ctx.translate(W/2, H/2 - 60 + sealBobY);
-        // keep the sprite height similar to previous design but preserve aspect ratio (50% smaller: 2.6 / 2 = 1.3)
-        const drawH = seal.r * 2 * 2.0;
-        const drawW = drawH * sealRatio;
+        const drawW = seal.r * 2 * 2.2;
+        const drawH = seal.r * 2 * 1.3;
         ctx.drawImage(sealSprite, -drawW / 2, -drawH / 2, drawW, drawH);
         ctx.drawImage(sealSprite, -drawW / 2, -drawH / 2, drawW, drawH);
         ctx.restore();
@@ -424,10 +400,8 @@ export const Game = () => {
       if(spritesLoad) {
         const s = seal;
         const img = pressed ? rollSprite : sealSprite;
-        // keep the sprite at a consistent height and preserve its natural aspect ratio (50% smaller: 2.0 / 2 = 1.0)
-        const drawH = s.r * 2 * 1.25;
-        const ratio = pressed ? rollRatio : sealRatio;
-        const drawW = drawH * ratio;
+        const drawW = s.r * 2 * 1.6;
+        const drawH = s.r * 2 * 1.0;
         ctx.save();
         ctx.translate(s.x, s.y);
         ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
