@@ -8,7 +8,7 @@
   border: 1px solid $SteelGray;
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
   h2 {
     font-family: $font-heading;
@@ -20,25 +20,59 @@
   .bar-graph__subtitle {
     font-family: $font-body;
     color: $Brown;
-    font-size: 0.9rem;
+    font-size: 1rem;
     margin-bottom: 8px;
   }
 
-  .bar-graph__svg { width: 100%; height: 340px; display: block; }
+  .bar-graph__svg {
+    width: 100%;
+    height: 340px;
+    display: block;
+  }
 
-  .axis text { font-family: $font-body; fill: $Brown; font-size: 12px; }
-  .axis path, .axis line { stroke: $SteelGray; }
+  .axis text {
+    font-family: $font-body;
+    fill: $Brown;
+    font-size: 1rem;
+  }
 
-  .grid line { stroke: lighten($SteelGray, 10%); }
+  .axis path,
+  .axis line {
+    stroke: $SteelGray;
+  }
+
+  .grid line {
+    stroke: lighten($SteelGray, 10%);
+  }
 
   // bars
-  .bar { shape-rendering: crispEdges; }
-  .bar--arctic { fill: $DeepBlue; }
-  .bar--antarctic { fill: $SunsetOrange; }
+  .bar {
+    shape-rendering: crispEdges;
+  }
+
+  .bar--arctic {
+    fill: $DeepBlue;
+  }
+
+  .bar--antarctic {
+    fill: $SunsetOrange;
+  }
 
   // legend
-  .legend { font-size: 12px; fill: $Brown; }
-  .legend-label { dominant-baseline: middle; }
-  .legend-swatch.bar--arctic { fill: $DeepBlue; }
-  .legend-swatch.bar--antarctic { fill: $SunsetOrange; }
+  .legend {
+    font-size: 1rem;
+    fill: $Brown;
+  }
+
+  .legend-label {
+    dominant-baseline: middle;
+  }
+
+  .legend-swatch.bar--arctic {
+    fill: $DeepBlue;
+  }
+
+  .legend-swatch.bar--antarctic {
+    fill: $SunsetOrange;
+  }
 }

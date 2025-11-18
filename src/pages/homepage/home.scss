@@ -1,11 +1,6 @@
 @import '../../variables.scss';
 
-.slogan {
-    text-align: center;
-    color: $SunsetOrange;
-    padding-top: 1rem;
-    font-size: 1.5rem;
-}
+
 
 .subheader-need-padding {
     padding-top: 3rem;
@@ -19,4 +14,16 @@
     border: 1px solid $SteelGray;
     border-radius: 12px;
     padding: 0.75rem;
+}
+
+.about-us-subheader,
+.game-subheader,
+.heat-map-subheader {
+    padding-bottom: 3rem;
+}
+
+.heat-map-subheader {
+    color: $Brown;
+    padding-left: 3rem;
+    font-size: 1.2rem;
 }

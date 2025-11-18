@@ -1,12 +1,11 @@
 import './home.scss';
 import { MaxWidth } from '../../components/MaxWidth/MaxWidth';
 import { TextImage } from '../../components/TextImage/TextImage';
-import { ImageOverlay } from '../../components/ImageOverlay/ImageOverlay';
+import { IcebergTitle } from '../../components/IcebergTitle/IcebergTitle';
 import { SealRoller } from '../../components/SealRoller/SealRoller';
 import { Button } from '../../components/Button/Button';
 import D3HeatMap from '../../components/D3HeatMap/D3HeatMap';
 import Placeholder from '../../assets/Home/placeholder.png';
-import Glacier from '../../assets/Home/glacier.jpg'
 import pointsJson from '../../back-end/antarctica_points.json'
 import MapofAntartica from '../../assets/Home/Map-of-Antarctica.png'
 
@@ -16,17 +15,15 @@ export const Homepage = () => {
 
   return (
     <main className="homepage">
-      <ImageOverlay
-        imageAlt='Glacier'
-        imageSource={Glacier}
-        text='Tip of the Iceberg'
-      />
       <MaxWidth>
-        <h3 className='slogan'>Going deeper on the impacts of global warming</h3>
-        <h2 className='subheader-need-padding'>Game</h2>
+        <IcebergTitle
+          title='Tip of the Iceberg'
+          subtitle='Going deeper on the impacts of global warming'
+        />
+        <h2 className='game-subheader'>Game</h2>
         <SealRoller />
         <h2 className='subheader-need-padding'>Data</h2>
-        <h3 className='subheader-need-padding'>Antarctica Heat Map</h3>
+        <h3 className='heat-map-subheader'>Antarctica Heat Map</h3>
         <div className="mw-900">
           <D3HeatMap
             imageSrc={MapofAntartica}

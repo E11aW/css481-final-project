@@ -12,7 +12,7 @@ export const ImageOverlay = (props) => {
     return (
         <div className='overlay-section'>
             <img className='background-image' src={props.imageSource} alt={props.imageAlt} />
-            <h1 className='text'>{props.text}</h1>
+            <p className='text'>{props.text}</p>
         </div>
     )
 }

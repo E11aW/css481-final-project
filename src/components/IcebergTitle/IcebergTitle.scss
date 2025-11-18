@@ -1,0 +1,35 @@
+@import '../../_variables.scss';
+
+.iceberg-title-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+
+    .blue-iceberg {
+        height: 350px;
+        width: auto;
+    }
+
+    .iceberg-subtitle {
+        color: $Brown;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    @media (max-width: 800px) {
+        flex-direction: column;
+
+        .iceberg-title {
+            font-size: 4rem;
+        }
+
+        .iceberg-subtitle {
+            font-size: 1.2rem;
+            padding-bottom: 1.5rem;
+        }
+    }
+}

@@ -1,6 +1,8 @@
 import './about-us.scss';
 import { MaxWidth } from '../../components/MaxWidth/MaxWidth';
 import { TextImage } from '../../components/TextImage/TextImage';
+import { ImageOverlay } from '../../components/ImageOverlay/ImageOverlay'
+import SealBackground from '../../assets/AboutUs/SealBackground.png'
 import EllaSeal from '../../assets/AboutUs/EllaSeal.png';
 import MaxxSeal from '../../assets/AboutUs/MaxxSeal.png';
 import ClaytonSeal from '../../assets/AboutUs/ClaytonSeal.png'
@@ -10,8 +12,12 @@ export const AboutUs = () => {
   return (
     <main className='about-us'>
       <MaxWidth>
-        <h1 className='about-us-title'>About Us</h1>
-        <h2>Our Mission</h2>
+        <ImageOverlay
+          imageAlt='Seals in the background'
+          imageSource={SealBackground}
+          text='We believe that the loss of arctic habitats is just the tip of the iceberg.'
+        />
+        <h2 className='mission-subheader'>Our Mission</h2>
         <p className='mission-paragraph'>Tip of the Iceberg focuses on spreading awareness on global warming and ice caps melting in an interactive and engaging way. This website includes multiple pages that share important data and statistics on these topics, using up-to-date information that demonstrates the true situation of global warming. We are striving to use data that goes deeper than the “tip of the iceberg”. Our game called “Save the Seal” interactively shares this data by presenting information about global warming to players as they roll through the game!</p>
         <h2>Our Team</h2>
         <p className='seal-instructions'>Click the seals for fun facts about our members!</p>
