@@ -4,6 +4,39 @@
 // safe fallbacks so this compiles even if tokens are missing
 $text: #0b1220 !default;
 
+// Game Theme Colors
+$game-bg-light: #cfeefc;
+$game-bg-sky: #cbe2e8;
+$game-bg-gradient-top: #6ba3c5;
+$game-bg-gradient-bottom: #a8d8ff;
+
+// Sky & Terrain
+$sun-color: #fff6b8;
+$hills-distant: #d0effb;
+$hills-mid: #b6e3f7;
+$hills-foreground: #89d3f1;
+
+// Ice & Melting
+$ice-light: #eaf6ff;
+$ice-edge: #d7f0ff;
+$ice-melt-overlay: rgba(220, 240, 255, 0.6);
+$melt-particle-color: rgba(60, 160, 220, 0.6);
+
+// UI Colors
+$title-dark: #06414a;
+$title-blue: #0a82b4;
+$loss-red: #c41e3a;
+$loss-red-dark: #8b1428;
+$loss-red-hover: #ff3a4a;
+$loss-red-hover-dark: #d41c34;
+
+// Warning Colors
+$warning-red: #c41e3a;
+$warning-overlay: rgba(196, 30, 58, 0.15);
+
+// Cloud Color
+$cloud-white: #ffffff;
+
 .game {
   height: calc(100vh - 7rem);
   margin: 0;

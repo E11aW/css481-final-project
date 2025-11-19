@@ -4,6 +4,30 @@ import "./game.scss";
 import sealSpriteSrc from '../../assets/Game/SealSprite.png';
 import rollSpriteSrc from '../../assets/Game/RollSprite.png';
 
+// Game Theme Colors (must match game.scss)
+const COLORS = {
+  gameBgLight: "#cfeefc",
+  gameBgSky: "#cbe2e8",
+  gameBgGradientTop: "#6ba3c5",
+  gameBgGradientBottom: "#a8d8ff",
+  sunColor: "#fff6b8",
+  hillsDistant: "#d0effb",
+  hillsMid: "#b6e3f7",
+  hillsForeground: "#89d3f1",
+  iceLight: "#eaf6ff",
+  iceEdge: "#d7f0ff",
+  iceParticleAlpha: 0.6,
+  titleDark: "#06414a",
+  titleBlue: "#0a82b4",
+  lossRed: "#c41e3a",
+  lossRedDark: "#8b1428",
+  lossRedHover: "#ff3a4a",
+  lossRedHoverDark: "#d41c34",
+  warningRed: "#c41e3a",
+  warningOverlayAlpha: 0.15,
+  cloudWhite: "#ffffff",
+};
+
 // Climate & seal fun facts
 const CLIMATE_FACTS = [
   "🌍 Seals rely on sea ice for resting and raising pups. Climate warming reduces their habitat!",
@@ -515,7 +539,7 @@ export const Game = () => {
     // ----- Draw Start Screen -----
   const drawStartScreen = () => {
       // Clear background
-      ctx.fillStyle = '#cbe2e8ff';
+      ctx.fillStyle = COLORS.gameBgSky;
       ctx.fillRect(0, 0, W, H);
       
       // Draw clouds (start screen)
@@ -542,7 +566,7 @@ export const Game = () => {
       }
 
       // Title (start screen)
-      ctx.fillStyle = "#06414a";
+      ctx.fillStyle = COLORS.titleDark;
       ctx.font = "48px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("Save The Seal", W / 2, H / 2 - 100);
@@ -594,7 +618,7 @@ export const Game = () => {
       
       // Draw Clouds (start screen)
       function drawCloud(x, y) {
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = COLORS.cloudWhite;
         ctx.beginPath();
         ctx.ellipse(x, y, 30, 20, 0, 0, Math.PI * 2);
         ctx.ellipse(x + 25, y - 10, 30, 20, 0, 0, Math.PI * 2);
@@ -616,7 +640,7 @@ export const Game = () => {
     // ----- Draw Win Screen -----
     const drawWinScreen = () => {
       // Clear background
-      ctx.fillStyle = '#cbe2e8ff';
+      ctx.fillStyle = COLORS.gameBgSky;
       ctx.fillRect(0, 0, W, H);
       
       // Draw clouds (win screen)
@@ -655,13 +679,13 @@ export const Game = () => {
       }
 
       // Title (win screen)
-      ctx.fillStyle = "#06414a";
+      ctx.fillStyle = COLORS.titleDark;
       ctx.font = "48px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("🎉 You Won! 🎉", W / 2, H / 2 - 100);
 
       // Subtitle
-      ctx.fillStyle = "#0a82b4";
+      ctx.fillStyle = COLORS.titleBlue;
       ctx.font = "24px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
       ctx.fillText("All climate facts learned!", W / 2, H / 2 - 20);
 
@@ -676,7 +700,7 @@ export const Game = () => {
       ctx.save();
       ctx.translate(startBtn.x + startBtn.w / 2, startBtn.y + startBtn.h / 2);
       ctx.scale(hoverScale, hoverScale);
-      ctx.fillStyle = startBtn.hover ? "#0a82b4" : "#0c3545ff";
+      ctx.fillStyle = startBtn.hover ? COLORS.titleBlue : "#0c3545ff";
       ctx.beginPath();
       ctx.roundRect(-startBtn.w / 2, -startBtn.h / 2, startBtn.w, startBtn.h, 12);
       ctx.shadowColor = startBtn.hover ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.1)";
@@ -689,7 +713,7 @@ export const Game = () => {
       ctx.restore();
 
       function drawCloud(x, y) {
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = COLORS.cloudWhite;
         ctx.beginPath();
         ctx.ellipse(x, y, 30, 20, 0, 0, Math.PI * 2);
         ctx.ellipse(x + 25, y - 10, 30, 20, 0, 0, Math.PI * 2);
@@ -703,8 +727,8 @@ export const Game = () => {
     const drawLossScreen = () => {
       // Clear background with gradient icy blue (darker at edges)
       const gradient = ctx.createLinearGradient(0, 0, 0, H);
-      gradient.addColorStop(0, '#6ba3c5');
-      gradient.addColorStop(1, '#a8d8ff');
+      gradient.addColorStop(0, COLORS.gameBgGradientTop);
+      gradient.addColorStop(1, COLORS.gameBgGradientBottom);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, W, H);
       
@@ -719,7 +743,7 @@ export const Game = () => {
         const snowY = ((elapsed * 80 + i * 50) % (H + 60)) - 30;
         ctx.save();
         ctx.globalAlpha = 0.4 + Math.sin(elapsed + i) * 0.3;
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = COLORS.cloudWhite;
         ctx.beginPath();
         ctx.arc(snowX, snowY, 3 + Math.sin(elapsed + i) * 1, 0, Math.PI * 2);
         ctx.fill();
@@ -756,18 +780,18 @@ export const Game = () => {
       // Dramatic title (loss screen)
       ctx.save();
       // Title with glow effect
-      ctx.shadowColor = 'rgba(196, 30, 58, 0.6)';
+      ctx.shadowColor = `rgba(${parseInt(COLORS.lossRed.slice(1,3), 16)}, ${parseInt(COLORS.lossRed.slice(3,5), 16)}, ${parseInt(COLORS.lossRed.slice(5,7), 16)}, 0.6)`;
       ctx.shadowBlur = 20;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 2;
-      ctx.fillStyle = "#c41e3a";
+      ctx.fillStyle = COLORS.lossRed;
       ctx.font = "bold 56px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("❄️ Ice Melted! ❄️", W / 2, H / 2 - 110);
       ctx.restore();
 
       // Subtitle with more context
-      ctx.fillStyle = "#06414a";
+      ctx.fillStyle = COLORS.titleDark;
       ctx.font = "20px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
       ctx.textAlign = "center";
       ctx.fillText("The seal couldn't escape the warming planet...", W / 2, H / 2 - 35);
@@ -775,7 +799,7 @@ export const Game = () => {
       // Facts learned display
       const factsArray = gameMode === "demo" ? DEMO_FACTS : CLIMATE_FACTS;
       const factsLearned = factsShown.size;
-      ctx.fillStyle = "#0a82b4";
+      ctx.fillStyle = COLORS.titleBlue;
       ctx.font = "18px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
       ctx.fillText(`You learned ${factsLearned} of ${factsArray.length} climate facts`, W / 2, H / 2 + 10);
 
@@ -791,8 +815,8 @@ export const Game = () => {
       ctx.scale(hoverScale, hoverScale);
       // Button with gradient
       const btnGradient = ctx.createLinearGradient(-startBtn.w / 2, -startBtn.h / 2, startBtn.w / 2, startBtn.h / 2);
-      btnGradient.addColorStop(0, startBtn.hover ? "#ff3a4a" : "#c41e3a");
-      btnGradient.addColorStop(1, startBtn.hover ? "#d41c34" : "#8b1428");
+      btnGradient.addColorStop(0, startBtn.hover ? COLORS.lossRedHover : COLORS.lossRed);
+      btnGradient.addColorStop(1, startBtn.hover ? COLORS.lossRedHoverDark : COLORS.lossRedDark);
       ctx.fillStyle = btnGradient;
       ctx.beginPath();
       ctx.roundRect(-startBtn.w / 2, -startBtn.h / 2, startBtn.w, startBtn.h, 12);
@@ -806,7 +830,7 @@ export const Game = () => {
       ctx.restore();
 
       function drawCloud(x, y) {
-        ctx.fillStyle = "#ffffff";
+        ctx.fillStyle = COLORS.cloudWhite;
         ctx.beginPath();
         ctx.ellipse(x, y, 30, 20, 0, 0, Math.PI * 2);
         ctx.ellipse(x + 25, y - 10, 30, 20, 0, 0, Math.PI * 2);
@@ -834,18 +858,18 @@ export const Game = () => {
       }
 
       // Clear background
-      ctx.fillStyle = "#cfeefc";
+      ctx.fillStyle = COLORS.gameBgLight;
       ctx.fillRect(0, 0, W, H);
 
       // Draw sun
       ctx.beginPath();
-      ctx.fillStyle = "#fff6b8";
+      ctx.fillStyle = COLORS.sunColor;
       ctx.arc(W - 80, 80, 36, 0, Math.PI * 2);
       ctx.fill(); 
 
       // Distant hills (back layer)
       ctx.beginPath();
-      ctx.fillStyle = "#d0effb";
+      ctx.fillStyle = COLORS.hillsDistant;
       ctx.moveTo(0, H);
       for (let sx = 0; sx <= W; sx += 12) {
         const worldX = sx + scroll * 0.3;
@@ -858,7 +882,7 @@ export const Game = () => {
 
       // Midground hills
       ctx.beginPath();
-      ctx.fillStyle = "#b6e3f7";
+      ctx.fillStyle = COLORS.hillsMid;
       ctx.moveTo(0, H);
       for (let sx = 0; sx <= W; sx += 10) {
         const worldX = sx + scroll * 0.5;
@@ -871,7 +895,7 @@ export const Game = () => {
 
       // Foreground ground
       ctx.beginPath();
-      ctx.fillStyle = "#89d3f1";
+      ctx.fillStyle = COLORS.hillsForeground;
       ctx.moveTo(0, H);
       for (let sx = 0; sx <= W; sx += 8) {
         const worldX = sx + scroll;
@@ -941,7 +965,7 @@ export const Game = () => {
         ctx.lineWidth = 3;
         ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
         // text
-        ctx.fillStyle = `rgba(6, 65, 74, ${alpha})`;
+        ctx.fillStyle = `rgba(${parseInt(COLORS.titleDark.slice(1,3), 16)}, ${parseInt(COLORS.titleDark.slice(3,5), 16)}, ${parseInt(COLORS.titleDark.slice(5,7), 16)}, ${alpha})`;
         ctx.font = "bold 18px 'Segoe UI', sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -973,11 +997,11 @@ export const Game = () => {
       // draw ice sheet overlay (subtle, anchored at BOTTOM) — ice sits on bottom where seal is
       ctx.save();
       ctx.globalAlpha = 0.9;
-      ctx.fillStyle = '#eaf6ff';
+      ctx.fillStyle = COLORS.iceLight;
       ctx.fillRect(0, H - iceHeight, W, iceHeight); // draw from BOTTOM up
       
       // draw a jagged ice edge to indicate melting (top edge of ice, where it melts)
-      ctx.fillStyle = '#d7f0ff';
+      ctx.fillStyle = COLORS.iceEdge;
       ctx.beginPath();
       ctx.moveTo(0, H - iceHeight);
       for (let ix = 0; ix <= W; ix += 24) {
@@ -1019,13 +1043,13 @@ export const Game = () => {
       if (distancePercent > 0.5) {
         // Warn when past 50%
         const warningIntensity = Math.max(0, (distancePercent - 0.5) * 2); // 0 to 1
-        ctx.fillStyle = `rgba(196, 30, 58, ${0.15 * warningIntensity})`;
+        ctx.fillStyle = `rgba(${parseInt(COLORS.warningRed.slice(1,3), 16)}, ${parseInt(COLORS.warningRed.slice(3,5), 16)}, ${parseInt(COLORS.warningRed.slice(5,7), 16)}, ${COLORS.warningOverlayAlpha * warningIntensity})`;
         ctx.fillRect(0, 0, W, H);
         
         // Add warning text when past 75%
         if (distancePercent > 0.75) {
           ctx.save();
-          ctx.fillStyle = `rgba(196, 30, 58, ${0.7 * (distancePercent - 0.75) * 4})`;
+          ctx.fillStyle = `rgba(${parseInt(COLORS.warningRed.slice(1,3), 16)}, ${parseInt(COLORS.warningRed.slice(3,5), 16)}, ${parseInt(COLORS.warningRed.slice(5,7), 16)}, ${0.7 * (distancePercent - 0.75) * 4})`;
           ctx.font = "bold 36px 'Segoe UI', sans-serif";
           ctx.textAlign = "center";
           ctx.fillText("⚠️ ICE MELTING! ⚠️", W / 2, 80);
