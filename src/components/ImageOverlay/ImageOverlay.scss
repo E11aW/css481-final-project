@@ -2,7 +2,9 @@
 
 .overlay-section {
     width: 100%;
-    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
     overflow: hidden;
 
@@ -14,9 +16,6 @@
 
     .text {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
         background-color: rgba($OffWhite, 0.5);
         padding: 10px;
         line-height: 1;
@@ -25,15 +24,5 @@
         font-family: $font-heading;
         font-weight: bold;
 
-    }
-
-    @media (max-width: 1000px) {
-
-        .text {
-            top: 0;
-            left: 0;
-            transform: translate(0, 100%);
-            width: 100%;
-        }
     }
 }

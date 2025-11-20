@@ -5,7 +5,7 @@ import { IcebergTitle } from '../../components/IcebergTitle/IcebergTitle';
 import { SealRoller } from '../../components/SealRoller/SealRoller';
 import { Button } from '../../components/Button/Button';
 import D3HeatMap from '../../components/D3HeatMap/D3HeatMap';
-import Placeholder from '../../assets/Home/placeholder.png';
+import GroupPhoto from '../../assets/Home/group-photo.jpg';
 import pointsJson from '../../back-end/antarctica_points.json'
 import MapofAntartica from '../../assets/Home/Map-of-Antarctica.png'
 
@@ -36,8 +36,8 @@ export const Homepage = () => {
         <h2 className='about-us-subheader'>About Us</h2>
         <TextImage
           text='We are a small team of 4 developers working to spread awareness about climate change and its impacts on arctic habitats. We all attend the University of Washington Bothell and completed this website as our final project for a Web Developing class. Our goal was to improve our frontend skills, connecting that with backend data to create a website that is visually interesting while also presenting the important data.'
-          imageSource={Placeholder}
-          imageAlt='Placeholder'
+          imageSource={GroupPhoto}
+          imageAlt='Development Team'
           hasButton={true}
           buttonText='Learn More!'
           buttonLink='/about-us'
