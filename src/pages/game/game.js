@@ -612,7 +612,7 @@ export const Game = () => {
       ctx.fillStyle = "#ffffff";
       ctx.font = "24px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText("Demo (3 facts)", 0, 8);
+      ctx.fillText("Demo (2 facts)", 0, 8);
       ctx.restore();
 
       
