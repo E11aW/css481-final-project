@@ -202,22 +202,22 @@ export const SealRoller = () => {
                 // Left wall
                 if (ball.x <= 0) {
                     ball.x = 0;
-                    ballVelocity.x = -ballVelocity.x;
+                    ballVelocity.x = -ballVelocity.x * 1.1;
                 }
                 // Right wall
                 if (ball.x >= rect.width - snowballSize) {
                     ball.x = rect.width - snowballSize;
-                    ballVelocity.x = -ballVelocity.x;
+                    ballVelocity.x = -ballVelocity.x * 1.1;
                 }
                 // Top wall
                 if (ball.y <= 0) {
                     ball.y = 0;
-                    ballVelocity.y = -ballVelocity.y;
+                    ballVelocity.y = -ballVelocity.y * 1.1;
                 }
                 // Bottom wall
                 if (ball.y >= rect.height - snowballSize) {
                     ball.y = rect.height - snowballSize;
-                    ballVelocity.y = -ballVelocity.y;
+                    ballVelocity.y = -ballVelocity.y * 1.1;
                 }
             }
 

@@ -21,7 +21,9 @@ export const Homepage = () => {
           subtitle='Going deeper on the impacts of global warming'
         />
         <h2 className='game-subheader'>Game</h2>
-        <SealRoller />
+      </MaxWidth>
+      <SealRoller />
+      <MaxWidth>
         <h2 className='subheader-need-padding'>Data</h2>
         <h3 className='heat-map-subheader'>Antarctica Heat Map</h3>
         <div className="mw-900">
