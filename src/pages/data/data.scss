@@ -1,54 +1,65 @@
-@import '../../variables.scss';
+// src/pages/data.scss
 
+// Adjust this path to wherever _variables.scss actually is.
+// If you keep it as a Sass partial, you can omit underscore and extension.
+@import '../../variables';
 
 .data-page {
-    padding: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 
+  &--loading,
+  &--error {
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+  }
 
-.data-page__header {
-    border: 2px solid $DeepBlue;
-    border-radius: 16px;
-    background: $OffWhite;
-    padding: 20px;
-    margin-bottom: 20px;
-}
+  &__error-message {
+    color: #d64545;
+    font-weight: 600;
+  }
 
+  &__top-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
 
-.data-page__header h1 {
-    font-family: $font-heading;
-    color: $DeepBlue;
-    font-size: 3rem;
-    line-height: 1.1;
-    margin: 0 0 10px 0;
-    text-transform: uppercase;
-    text-align: left;
-}
+  &__section {
+    margin-top: 0.5rem;
+  }
 
-
-.data-page__intro {
-    font-family: $font-body;
-    color: $Brown;
-}
-
-
-.data-page__content {
+  &__section--graphs {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
 
-
-    @media (min-width: 1000px) {
-        grid-template-columns: 1fr 1fr;
+    @media (min-width: 900px) {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
     }
-}
+  }
 
+  &__panel {
+    background: #0b1824; // can tweak to match your theme
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
 
-.data-page__card {
-    border: 2px solid $DeepBlue;
-    border-radius: 16px;
-    background: $OffWhite;
-    padding: 12px;
+  &__panel--table {
+    overflow: hidden;
+  }
+
+  &__panel-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+  }
 }
