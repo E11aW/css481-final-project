@@ -36,7 +36,7 @@ export const SealRoller = () => {
 
     // Snowball references and values
     const snowballSize = 50;
-    const [snowballPosition, setSnowballPosition] = useState({ x: 70, y: 100 });
+    const [snowballPosition, setSnowballPosition] = useState({ x: 100, y: 100 });
     const snowballRef = useRef(snowballPosition);
     const snowballVelocityRef = useRef({ x: 0, y: 0 });
 
@@ -52,8 +52,8 @@ export const SealRoller = () => {
             sealPositionRef.current = { x: startX, y: startY };
             targetPositionRef.current = { x: startX, y: startY };
             // Place snowball next to seal
-            setSnowballPosition({ x: startX - 80, y: startY });
-            snowballRef.current = { x: startX - 80, y: startY };
+            setSnowballPosition({ x: startX + 150, y: startY + 50 });
+            snowballRef.current = { x: startX + 150, y: startY + 50 };
             snowballVelocityRef.current = { x: 0, y: 0 };
         }
     }, []);
