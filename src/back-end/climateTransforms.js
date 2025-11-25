@@ -1,4 +1,4 @@
-// src/climateTransforms.js
+// src/back-end/climateTransforms.js
 
 // daily: { time: [...], [variableName]: [...] }
 export function toLineSeries(daily, variableName) {
@@ -19,31 +19,36 @@ export function toMonthlyHeatmapPoints(daily, variableName) {
   const byYearMonth = new Map();
 
   times.forEach((date, i) => {
+    const value = values[i];
+    if (value == null) return;
+
     const [yStr, mStr] = date.split('-');
     const year = Number(yStr);
     const month = Number(mStr); // 1–12
+    if (Number.isNaN(year) || Number.isNaN(month)) return;
+
     const key = `${year}-${month}`;
 
     if (!byYearMonth.has(key)) {
       byYearMonth.set(key, { year, month, sum: 0, count: 0 });
     }
     const entry = byYearMonth.get(key);
-    entry.sum += values[i];
+    entry.sum += value;
     entry.count += 1;
   });
 
   const entries = Array.from(byYearMonth.values())
-    .filter(e => e.count > 0)
+    .filter((e) => e.count > 0)
     .sort((a, b) => a.year - b.year || a.month - b.month);
 
-  const years = Array.from(new Set(entries.map(e => e.year))).sort();
+  const years = Array.from(new Set(entries.map((e) => e.year))).sort();
   const yearIndex = new Map(years.map((y, i) => [y, i]));
 
-  const totalYears = years.length;
+  const totalYears = years.length || 1;
   const totalMonths = 12;
 
-  return entries.map(e => {
-    const yi = yearIndex.get(e.year);
+  return entries.map((e) => {
+    const yi = yearIndex.get(e.year) ?? 0;
     return {
       year: e.year,
       month: e.month,
@@ -56,19 +61,31 @@ export function toMonthlyHeatmapPoints(daily, variableName) {
 }
 
 // Table rows: one row per day
-export function toTableRows(daily, variableName, locationLabel) {
+// `datasetId` lets Filters filter by dataset
+export function toTableRows(
+  daily,
+  variableName,
+  locationLabel,
+  datasetId = 1
+) {
   const times = daily.time || [];
   const values = daily[variableName] || [];
 
   return times.map((date, i) => {
+    const value = values[i];
     const [yearStr, monthStr, dayStr] = date.split('-');
+    const year = Number(yearStr);
+    const month = Number(monthStr);
+    const day = Number(dayStr);
+
     return {
       id: i,
+      datasetId,
       date,
-      year: Number(yearStr),
-      month: Number(monthStr),
-      day: Number(dayStr),
-      value: values[i],
+      year,
+      month,
+      day,
+      value,
       location: locationLabel,
     };
   });

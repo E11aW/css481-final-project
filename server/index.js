@@ -1,24 +1,26 @@
 // server/index.js
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch');   // node-fetch@2
+const { URL } = require('url');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Defaults: Arctic-ish location + 40-year range
+// Defaults: Arctic-ish location + allowed Open-Meteo range
 const DEFAULT_LAT = 78.2;   // Svalbard-ish
 const DEFAULT_LON = 15.6;
-const DEFAULT_START = '1980-01-01';
-const DEFAULT_END = '2020-12-31';
+
+// Open-Meteo error told us: allowed range is 2013-01-01 to 2050-12-31
+const DEFAULT_START = '2013-01-01';
+const DEFAULT_END = '2024-12-31';  // you can extend up to '2050-12-31'
 const DEFAULT_MODEL = 'CMCC_CM2_VHR4';
 const DEFAULT_DAILY = 'temperature_2m_mean';
 
 // ---- GET /api/climate/daily ----
-// Example: /api/climate/daily?lat=78.2&lon=15.6&start=1980-01-01&end=2020-12-31&model=CMCC_CM2_VHR4&variable=temperature_2m_mean
 app.get('/api/climate/daily', async (req, res) => {
-  const {
+  let {
     lat = DEFAULT_LAT,
     lon = DEFAULT_LON,
     start = DEFAULT_START,
@@ -26,6 +28,14 @@ app.get('/api/climate/daily', async (req, res) => {
     model = DEFAULT_MODEL,
     variable = DEFAULT_DAILY,
   } = req.query;
+
+  // Enforce Open-Meteo's allowed range on the server side
+  const MIN_START = '2013-01-01';
+  const MAX_END = '2050-12-31';
+
+  if (start < MIN_START) start = MIN_START;
+  if (end > MAX_END) end = MAX_END;
+  if (end < start) end = start;
 
   try {
     const url = new URL('https://climate-api.open-meteo.com/v1/climate');
@@ -37,16 +47,21 @@ app.get('/api/climate/daily', async (req, res) => {
     url.searchParams.set('daily', variable);
     url.searchParams.set('timezone', 'UTC');
 
+    console.log('Calling Open-Meteo:', url.toString());
+
     const response = await fetch(url.toString());
+
     if (!response.ok) {
-      return res.status(response.status).json({ error: 'Open-Meteo error' });
+      const errorText = await response.text();
+      console.error('Open-Meteo error status:', response.status);
+      console.error('Open-Meteo error body:', errorText);
+      return res
+        .status(response.status)
+        .type('application/json')
+        .send(errorText);
     }
 
     const data = await response.json();
-    // data.daily:
-    //   time: ["YYYY-MM-DD", ...]
-    //   [variable]: [value, ...], e.g. temperature_2m_mean: [...]
-    // data.daily_units: units
     res.json(data);
   } catch (err) {
     console.error('Error fetching climate data', err);
@@ -54,7 +69,7 @@ app.get('/api/climate/daily', async (req, res) => {
   }
 });
 
-// ---- Simple CRUD for user notes (optional, but good for the assignment) ----
+// ---- Simple in-memory CRUD for notes (optional) ----
 let notes = [];
 let nextNoteId = 1;
 
@@ -74,7 +89,7 @@ app.post('/api/notes', (req, res) => {
 // PUT /api/notes/:id
 app.put('/api/notes/:id', (req, res) => {
   const id = Number(req.params.id);
-  const idx = notes.findIndex(n => n.id === id);
+  const idx = notes.findIndex((n) => n.id === id);
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
 
   notes[idx] = { ...notes[idx], ...req.body };
@@ -84,7 +99,7 @@ app.put('/api/notes/:id', (req, res) => {
 // DELETE /api/notes/:id
 app.delete('/api/notes/:id', (req, res) => {
   const id = Number(req.params.id);
-  const idx = notes.findIndex(n => n.id === id);
+  const idx = notes.findIndex((n) => n.id === id);
   if (idx === -1) return res.status(404).json({ error: 'Not found' });
 
   const [deleted] = notes.splice(idx, 1);
