@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import './data.scss';
 
 import { fetchDailyClimate } from '../../back-end/dataSource';
-import { toLineSeries, toTableRows } from '../../back-end/climateTransforms';
+import { toTableRows } from '../../back-end/climateTransforms';
 
 import { LineGraph } from '../../components/LineGraph/LineGraph';
 import { BarGraph } from '../../components/BarGraph/BarGraph';
@@ -20,8 +20,8 @@ const DEFAULT_QUERY = {
 };
 
 function Data() {
-  const [lineData, setLineData] = useState([]);
   const [tableRows, setTableRows] = useState([]);
+  const [lineSeries, setLineSeries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -37,7 +37,6 @@ function Data() {
         const daily = climateRes.daily || {};
         const variableName = queryParams.variable;
 
-        const line = toLineSeries(daily, variableName);
         const rows = toTableRows(
           daily,
           variableName,
@@ -45,8 +44,13 @@ function Data() {
           1
         );
 
-        setLineData(line);
         setTableRows(rows);
+
+        // Build yearly averages and then anomalies for the line graph
+        const yearly = computeYearlyAveragesFromRows(rows); // [{ label: "2013", value }]
+        const anomalies = buildAnomalySeries(yearly);
+
+        setLineSeries(anomalies);
       } catch (e) {
         console.error(e);
         setError(e.message || 'Failed to load data');
@@ -94,13 +98,12 @@ function Data() {
       <section className="data-page__section data-page__section--graphs">
         <div className="data-page__panel">
           <h2 className="data-page__panel-title">
-            Arctic Temperature Trend
+            Yearly Temperature Anomaly
           </h2>
           <LineGraph
-            data={lineData}
-            metricLabel="Mean temperature (°C)"
+            data={lineSeries}
+            metricLabel="Difference from 2013–2015 average (°C)"
             onPointClick={(date, value) => {
-              // For now just log; later you can hook this into table/notes/filters
               console.log('Line point clicked:', date, value);
             }}
           />
@@ -125,7 +128,7 @@ function Data() {
   );
 }
 
-// ----- helpers for aggregates from tableRows -----
+// ---------- helpers ----------
 
 function computeYearlyAveragesFromRows(rows) {
   const byYear = new Map();
@@ -197,6 +200,22 @@ function computeDecadeAveragesFromRows(rows) {
       label: `${decade}s`,
       value: count > 0 ? sum / count : 0,
     }));
+}
+
+// Build anomaly series from yearly averages
+// baseline = mean of first 3 years (or all if fewer than 3)
+function buildAnomalySeries(yearly) {
+  if (!yearly || yearly.length === 0) return [];
+
+  const baselineCount = Math.min(3, yearly.length);
+  const baselineSlice = yearly.slice(0, baselineCount);
+  const baselineAvg =
+    baselineSlice.reduce((acc, d) => acc + d.value, 0) / baselineCount;
+
+  return yearly.map((d) => ({
+    date: `${d.label}-01-01`, // one point per year
+    value: d.value - baselineAvg,
+  }));
 }
 
 export default Data;

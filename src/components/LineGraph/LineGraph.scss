@@ -52,6 +52,13 @@
   .line-path {
     stroke: $DeepBlue;
     stroke-width: 2.5;
+    fill: none;
+  }
+
+  .zero-line {
+    stroke: $SteelGray;
+    stroke-dasharray: 4 4;
+    stroke-width: 1.2;
   }
 
   .dot {
@@ -64,5 +71,28 @@
   .dot:hover {
     r: 4;
     stroke-width: 2.5;
+  }
+
+  .focus-dot {
+    fill: $SunsetOrange;
+    stroke: $DeepBlue;
+    stroke-width: 1.5;
+  }
+
+  .focus-label {
+    font-family: $font-body;
+    font-size: 0.9rem;
+    fill: $Brown;
+  }
+
+  .focus-label-bg {
+    fill: $White;
+    stroke: $SteelGray;
+    stroke-width: 1;
+    opacity: 0.95;
+  }
+
+  .hover-overlay {
+    cursor: crosshair;
   }
 }
