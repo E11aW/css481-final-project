@@ -1,8 +1,11 @@
 // server/index.js
 const express = require('express');
 const cors = require('cors');
-const fetch = require('node-fetch');   // node-fetch@2
+const fetch = require('node-fetch');   // make sure you have node-fetch@2 installed
 const { URL } = require('url');
+
+// If antarctica_points.json is somewhere else, adjust the path accordingly
+const antarcticaPoints = require('../src/back-end/antarctica_points.json');
 
 const app = express();
 app.use(cors());
@@ -14,11 +17,14 @@ const DEFAULT_LON = 15.6;
 
 // Open-Meteo error told us: allowed range is 2013-01-01 to 2050-12-31
 const DEFAULT_START = '2013-01-01';
-const DEFAULT_END = '2024-12-31';  // you can extend up to '2050-12-31'
+const DEFAULT_END = '2024-12-31';  // you can push to '2050-12-31' if you want
 const DEFAULT_MODEL = 'CMCC_CM2_VHR4';
 const DEFAULT_DAILY = 'temperature_2m_mean';
 
 // ---- GET /api/climate/daily ----
+// Proxies to Open-Meteo Climate API
+// Example:
+//   /api/climate/daily?lat=78.2&lon=15.6&start=2013-01-01&end=2024-12-31&model=CMCC_CM2_VHR4&variable=temperature_2m_mean
 app.get('/api/climate/daily', async (req, res) => {
   let {
     lat = DEFAULT_LAT,
@@ -44,6 +50,11 @@ app.get('/api/climate/daily', async (req, res) => {
     url.searchParams.set('start_date', start);
     url.searchParams.set('end_date', end);
     url.searchParams.set('models', model);
+
+    // You can request multiple daily variables by joining with commas.
+    // For now we respect "variable" from the query, but you could also
+    // hardcode multiple here if you want more metrics:
+    //   url.searchParams.set('daily', 'temperature_2m_mean,temperature_2m_max,precipitation_sum');
     url.searchParams.set('daily', variable);
     url.searchParams.set('timezone', 'UTC');
 
@@ -69,7 +80,19 @@ app.get('/api/climate/daily', async (req, res) => {
   }
 });
 
-// ---- Simple in-memory CRUD for notes (optional) ----
+// ---- GET /api/antarctica-points ----
+// Serves normalized Antarctica points for the homepage heatmap.
+// Typically looks like:
+//   { note, points: [{ nx, ny, value }, ...] }
+// or just an array of points. We just pass through the JSON.
+app.get('/api/antarctica-points', (req, res) => {
+  res.json(antarcticaPoints);
+});
+
+// ---- Simple in-memory CRUD for notes ----
+//
+// Model:
+// { id: number, date: "YYYY-MM-DD", value: number, summary: string }
 let notes = [];
 let nextNoteId = 1;
 

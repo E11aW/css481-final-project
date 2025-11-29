@@ -1,50 +1,120 @@
+// src/pages/home.js
+import React, { useEffect, useState } from 'react';
 import './home.scss';
-import { MaxWidth } from '../../components/MaxWidth/MaxWidth';
-import { TextImage } from '../../components/TextImage/TextImage';
-import { IcebergTitle } from '../../components/IcebergTitle/IcebergTitle';
-import { SealRoller } from '../../components/SealRoller/SealRoller';
-import { Button } from '../../components/Button/Button';
+
 import D3HeatMap from '../../components/D3HeatMap/D3HeatMap';
-import GroupPhoto from '../../assets/Home/group-photo.jpg';
-import pointsJson from '../../back-end/antarctica_points.json'
-import MapofAntartica from '../../assets/Home/Map-of-Antarctica.png'
+import { fetchAntarcticaPoints } from '../../back-end/dataSource';
 
-export const Homepage = () => {
+function Home() {
+  const [points, setPoints] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const pts = pointsJson.points.map(p => ({ nx: p.nx, ny: p.ny, value: p.value }));
+  useEffect(() => {
+    async function loadPoints() {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchAntarcticaPoints();
+
+        // Handle both shapes:
+        // { note, points: [...] }  OR  just  [...]
+        const pts = Array.isArray(data) ? data : data.points || [];
+        setPoints(pts);
+      } catch (e) {
+        console.error(e);
+        setError(e.message || 'Failed to load Antarctica data');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadPoints();
+  }, []);
 
   return (
-    <main className="homepage">
-      <MaxWidth>
-        <IcebergTitle
-          title='Tip of the Iceberg'
-          subtitle='Going deeper on the impacts of global warming'
-        />
-        <h2 className='game-subheader'>Game</h2>
-      </MaxWidth>
-      <SealRoller />
-      <MaxWidth>
-        <h2 className='subheader-need-padding'>Data</h2>
-        <h3 className='heat-map-subheader'>Antarctica Heat Map</h3>
-        <div className="mw-900">
-          <D3HeatMap
-            imageSrc={MapofAntartica}
-            points={pts}
-            normalized={true}
-            cellSize={28}
-          />
-          <Button className='button' buttonLink='/data' buttonText='More Data!' />
+    <div className="home">
+      <section className="home__hero">
+        <div className="home__hero-text">
+          <h1 className="home__title">Tip of the Iceberg</h1>
+          <p className="home__subtitle">
+            Explore how a warming world is reshaping Antarctica&apos;s ice.
+          </p>
+
+          <div className="home__highlights">
+            <div className="home__highlight">
+              <h3>Why Antarctica?</h3>
+              <p>
+                Antarctica holds around 90% of the world&apos;s ice. Small
+                changes here can mean big changes in global sea level.
+              </p>
+            </div>
+            <div className="home__highlight">
+              <h3>What you&apos;re seeing</h3>
+              <p>
+                Each point on the map represents a location on the continent.
+                Brighter areas indicate stronger climate stress — regions where
+                warming and ice loss are most pronounced.
+              </p>
+            </div>
+            <div className="home__highlight">
+              <h3>Dig into the data</h3>
+              <p>
+                Head to the Data page to explore daily Arctic climate time
+                series, filter by year, and annotate trends with your own notes.
+              </p>
+            </div>
+          </div>
+
+          <div className="home__cta-row">
+            <a className="home__cta-button" href="/data">
+              Explore the data
+            </a>
+            <span className="home__cta-note">
+              Live climate data from the Open-Meteo Climate API.
+            </span>
+          </div>
         </div>
-        <h2 className='about-us-subheader'>About Us</h2>
-        <TextImage
-          text='We are a small team of 4 developers working to spread awareness about climate change and its impacts on arctic habitats. We all attend the University of Washington Bothell and completed this website as our final project for a Web Developing class. Our goal was to improve our frontend skills, connecting that with backend data to create a website that is visually interesting while also presenting the important data.'
-          imageSource={GroupPhoto}
-          imageAlt='Development Team'
-          hasButton={true}
-          buttonText='Learn More!'
-          buttonLink='/about-us'
-        />
-      </MaxWidth>
-    </main>
+
+        <div className="home__hero-visual">
+          <div className="home__heatmap-card">
+            <div className="home__heatmap-header">
+              <h2>Antarctic Stress Map</h2>
+              <p>Relative climate stress across the continent.</p>
+            </div>
+
+            {loading && (
+              <div className="home__heatmap-status">Loading map…</div>
+            )}
+            {error && (
+              <div className="home__heatmap-status home__heatmap-status--error">
+                {error}
+              </div>
+            )}
+
+            {!loading && !error && (
+              <div className="home__heatmap-wrapper">
+                {/* D3HeatMap expects normalized points: { nx, ny, value } */}
+                <D3HeatMap points={points} />
+              </div>
+            )}
+
+            <div className="home__legend">
+              <span className="home__legend-label">Lower stress</span>
+              <span className="home__legend-gradient" />
+              <span className="home__legend-label">Higher stress</span>
+            </div>
+
+            <p className="home__heatmap-footnote">
+              This visualization highlights where modeled conditions place the
+              most pressure on Antarctic ice. It&apos;s a simplified view, but a
+              powerful reminder that melting here affects coastlines everywhere.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
+
+export default Home;
