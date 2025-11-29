@@ -40,11 +40,14 @@ export const BarGraph = ({
         ? yearlyData
         : decadeData;
 
-    if (!data || data.length === 0) {
-      return;
-    }
+    if (!data || data.length === 0) return;
 
-    const margin = { top: 32, right: 16, bottom: 40, left: 56 };
+    // More bottom margin in month mode for rotated labels
+    const margin =
+      mode === "month"
+        ? { top: 32, right: 16, bottom: 72, left: 56 }
+        : { top: 32, right: 16, bottom: 40, left: 56 };
+
     const innerW = width - margin.left - margin.right;
     const innerH = height - margin.top - margin.bottom;
 
@@ -52,28 +55,57 @@ export const BarGraph = ({
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Scales
+    // X scale
     const x = d3
       .scaleBand()
       .domain(data.map((d) => d.label))
       .range([0, innerW])
       .padding(0.3);
 
-    const maxValue = d3.max(data, (d) => d.value) ?? 0;
+    // Y scale – zoom into data range a bit so differences pop more
+    const values = data.map((d) => d.value);
+    const minValue = d3.min(values) ?? 0;
+    const maxValue = d3.max(values) ?? 0;
+
+    const span = maxValue - minValue || maxValue || 1;
+    const pad = span * 0.1;
+
+    // Keep 0 in view if values cross or touch 0
+    const yMin = minValue > 0 ? Math.max(0, minValue - pad) : minValue - pad;
+    const yMax = maxValue + pad;
+
     const y = d3
       .scaleLinear()
-      .domain([0, maxValue])
+      .domain([yMin, yMax])
       .nice()
       .range([innerH, 0]);
 
     // Axes
-    const xAxis = d3.axisBottom(x);
+    let xAxis = d3.axisBottom(x);
+
+    // For months, only show every Nth label so it doesn't cram
+    if (mode === "month") {
+      const domain = x.domain();
+      const tickValues = domain.filter((_, i) => i % 6 === 0); // every ~6th month
+      xAxis = xAxis.tickValues(tickValues);
+    }
+
     const yAxis = d3.axisLeft(y).ticks(6);
 
-    g.append("g")
+    const xAxisG = g
+      .append("g")
       .attr("class", "axis axis--x")
       .attr("transform", `translate(0,${innerH})`)
       .call(xAxis);
+
+    if (mode === "month") {
+      xAxisG
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .attr("text-anchor", "end")
+        .attr("dx", "-0.4em")
+        .attr("dy", "0.25em");
+    }
 
     g.append("g").attr("class", "axis axis--y").call(yAxis);
 
@@ -102,12 +134,10 @@ export const BarGraph = ({
       .attr("width", x.bandwidth())
       .attr("height", (d) => innerH - y(d.value));
 
-    // Native tooltip
     bars
       .append("title")
       .text((d) => `${d.label}: ${d.value.toFixed(2)}`);
 
-    // Click → bubble up with granularity info
     if (onBarClick) {
       bars.style("cursor", "pointer").on("click", (_, d) => {
         onBarClick({ ...d, granularity: mode });
