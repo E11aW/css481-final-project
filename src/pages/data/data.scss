@@ -1,14 +1,12 @@
 // src/pages/data.scss
-
-// Adjust this path to wherever _variables.scss actually is.
-// If you keep it as a Sass partial, you can omit underscore and extension.
-@import '../../variables';
+@import '../../variables.scss';
 
 .data-page {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  background: $White;
 
   &--loading,
   &--error {
@@ -20,46 +18,32 @@
   &__error-message {
     color: #d64545;
     font-weight: 600;
-  }
-
-  &__top-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.5rem;
+    font-family: $font-body;
   }
 
   &__section {
     margin-top: 0.5rem;
   }
 
-  &__section--graphs {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
-
-    @media (min-width: 900px) {
-      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
-    }
-  }
-
   &__panel {
-    background: #0b1824; // can tweak to match your theme
-    border-radius: 0.75rem;
-    padding: 1rem 1.25rem;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-  }
-
-  &__panel--table {
-    overflow: hidden;
+    background: $OffWhite;
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid $SteelGray;
   }
 
   &__panel-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin: 0 0 0.75rem;
+    font-size: 1.6rem;
+    font-family: $font-heading;
+    color: $DeepBlue;
+    margin: 0 0 0.25rem;
+  }
+
+  &__panel-subtitle {
+    font-family: $font-body;
+    font-size: 1rem;
+    color: $Brown;
+    margin-bottom: 0.75rem;
   }
 }

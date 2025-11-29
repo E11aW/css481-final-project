@@ -1,42 +1,52 @@
 // src/components/BarGraph/BarGraph.js
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./BarGraph.scss";
 
 /**
  * Props:
- *  - data: [{ label: string, value: number }]
- *      e.g. [{ label: "2010s", value: 3.1 }, { label: "2020s", value: 4.2 }]
+ *  - monthlyData: [{ label: string, value: number }]
+ *  - yearlyData:  [{ label: string, value: number }]
+ *  - decadeData:  [{ label: string, value: number }]
  *  - width?: number
  *  - height?: number
- *  - title?: string
  *  - subtitle?: string
- *  - onBarClick?: (d: { label: string, value: number }) => void
+ *  - onBarClick?: (d: { label: string, value: number, granularity: 'month'|'year'|'decade' }) => void
  */
 export const BarGraph = ({
-  data = [],
+  monthlyData = [],
+  yearlyData = [],
+  decadeData = [],
   width = 640,
   height = 340,
-  title = "Average Climate Metric by Decade",
-  subtitle = "",
+  subtitle = "Arctic temperature (Open-Meteo 2013–2024)",
   onBarClick,
 }) => {
   const ref = useRef(null);
+  const [mode, setMode] = useState("decade"); // 'month' | 'year' | 'decade'
 
   useEffect(() => {
-    if (!data || data.length === 0) return;
-
-    const margin = { top: 32, right: 16, bottom: 40, left: 56 };
-    const innerW = width - margin.left - margin.right;
-    const innerH = height - margin.top - margin.bottom;
-
     const svg = d3
       .select(ref.current)
       .attr("viewBox", `0 0 ${width} ${height}`)
       .attr("preserveAspectRatio", "xMidYMid meet");
 
-    // Clear previous render
     svg.selectAll("*").remove();
+
+    const data =
+      mode === "month"
+        ? monthlyData
+        : mode === "year"
+        ? yearlyData
+        : decadeData;
+
+    if (!data || data.length === 0) {
+      return;
+    }
+
+    const margin = { top: 32, right: 16, bottom: 40, left: 56 };
+    const innerW = width - margin.left - margin.right;
+    const innerH = height - margin.top - margin.bottom;
 
     const g = svg
       .append("g")
@@ -97,21 +107,58 @@ export const BarGraph = ({
       .append("title")
       .text((d) => `${d.label}: ${d.value.toFixed(2)}`);
 
-    // Click interactivity
+    // Click → bubble up with granularity info
     if (onBarClick) {
       bars.style("cursor", "pointer").on("click", (_, d) => {
-        onBarClick(d);
+        onBarClick({ ...d, granularity: mode });
       });
     }
-  }, [data, width, height, onBarClick]);
+  }, [mode, monthlyData, yearlyData, decadeData, width, height, onBarClick]);
 
   return (
     <section className="bar-graph">
       <header className="bar-graph__header">
-        <h2>{title}</h2>
-        {subtitle && (
-          <p className="bar-graph__subtitle">{subtitle}</p>
-        )}
+        <div>
+          <h2>Temperature Averages</h2>
+          {subtitle && (
+            <p className="bar-graph__subtitle">{subtitle}</p>
+          )}
+        </div>
+        <div className="bar-graph__controls">
+          <button
+            type="button"
+            className={
+              mode === "month"
+                ? "bar-graph__btn bar-graph__btn--active"
+                : "bar-graph__btn"
+            }
+            onClick={() => setMode("month")}
+          >
+            Months
+          </button>
+          <button
+            type="button"
+            className={
+              mode === "year"
+                ? "bar-graph__btn bar-graph__btn--active"
+                : "bar-graph__btn"
+            }
+            onClick={() => setMode("year")}
+          >
+            Years
+          </button>
+          <button
+            type="button"
+            className={
+              mode === "decade"
+                ? "bar-graph__btn bar-graph__btn--active"
+                : "bar-graph__btn"
+            }
+            onClick={() => setMode("decade")}
+          >
+            Decades
+          </button>
+        </div>
       </header>
       <svg ref={ref} className="bar-graph__svg" />
     </section>
