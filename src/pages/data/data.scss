@@ -1,4 +1,3 @@
-// src/pages/data.scss
 @import '../../variables.scss';
 
 .data-page {
@@ -25,6 +24,16 @@
     margin-top: 0.5rem;
   }
 
+  &__section--graphs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+
+    @media (min-width: 900px) {
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    }
+  }
+
   &__panel {
     background: $OffWhite;
     border-radius: 16px;
@@ -34,16 +43,9 @@
   }
 
   &__panel-title {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     font-family: $font-heading;
     color: $DeepBlue;
-    margin: 0 0 0.25rem;
-  }
-
-  &__panel-subtitle {
-    font-family: $font-body;
-    font-size: 1rem;
-    color: $Brown;
-    margin-bottom: 0.75rem;
+    margin: 0 0 0.5rem;
   }
 }

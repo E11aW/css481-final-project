@@ -3,7 +3,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import './data.scss';
 
 import { fetchDailyClimate } from '../../back-end/dataSource';
-import { toTableRows } from '../../back-end/climateTransforms';
+import { toLineSeries, toTableRows } from '../../back-end/climateTransforms';
+
+import { LineGraph } from '../../components/LineGraph/LineGraph';
 import { BarGraph } from '../../components/BarGraph/BarGraph';
 
 const DEFAULT_VARIABLE = 'temperature_2m_mean';
@@ -11,13 +13,14 @@ const DEFAULT_VARIABLE = 'temperature_2m_mean';
 const DEFAULT_QUERY = {
   lat: 78.2,
   lon: 15.6,
-  start: '2013-01-01', // within Open-Meteo allowed range
+  start: '2013-01-01',
   end: '2024-12-31',
   model: 'CMCC_CM2_VHR4',
   variable: DEFAULT_VARIABLE,
 };
 
 function Data() {
+  const [lineData, setLineData] = useState([]);
   const [tableRows, setTableRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,7 +37,7 @@ function Data() {
         const daily = climateRes.daily || {};
         const variableName = queryParams.variable;
 
-        // Single datasetId = 1 for now
+        const line = toLineSeries(daily, variableName);
         const rows = toTableRows(
           daily,
           variableName,
@@ -42,6 +45,7 @@ function Data() {
           1
         );
 
+        setLineData(line);
         setTableRows(rows);
       } catch (e) {
         console.error(e);
@@ -87,21 +91,33 @@ function Data() {
 
   return (
     <div className="data-page">
-      <section className="data-page__section">
+      <section className="data-page__section data-page__section--graphs">
         <div className="data-page__panel">
           <h2 className="data-page__panel-title">
-            Temperature Averages – Bar Graph Test
+            Arctic Temperature Trend
           </h2>
-          <p className="data-page__panel-subtitle">
-            Mean temperature (°C) from Open-Meteo climate data, aggregated by
-            month / year / decade.
-          </p>
+          <LineGraph
+            data={lineData}
+            metricLabel="Mean temperature (°C)"
+            onPointClick={(date, value) => {
+              // For now just log; later you can hook this into table/notes/filters
+              console.log('Line point clicked:', date, value);
+            }}
+          />
+        </div>
 
+        <div className="data-page__panel">
+          <h2 className="data-page__panel-title">
+            Temperature Averages – Months / Years / Decades
+          </h2>
           <BarGraph
             monthlyData={monthlyAverages}
             yearlyData={yearlyAverages}
             decadeData={decadeAverages}
             subtitle="Mean temperature (°C)"
+            onBarClick={(d) => {
+              console.log('Bar clicked:', d);
+            }}
           />
         </div>
       </section>
@@ -109,7 +125,7 @@ function Data() {
   );
 }
 
-// ---------- helpers to build monthly / yearly / decade datasets ----------
+// ----- helpers for aggregates from tableRows -----
 
 function computeYearlyAveragesFromRows(rows) {
   const byYear = new Map();
@@ -156,7 +172,7 @@ function computeMonthlyAveragesFromRows(rows) {
   );
 
   return entries.map((e) => ({
-    label: `${e.year}-${String(e.month).padStart(2, '0')}`, // e.g. "2013-01"
+    label: `${e.year}-${String(e.month).padStart(2, '0')}`,
     value: e.count > 0 ? e.sum / e.count : 0,
   }));
 }
