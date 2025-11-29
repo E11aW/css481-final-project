@@ -45,34 +45,14 @@
     stroke: lighten($SteelGray, 10%);
   }
 
-  // bars
   .bar {
     shape-rendering: crispEdges;
-  }
-
-  .bar--arctic {
     fill: $DeepBlue;
+    transition: opacity 0.15s ease, transform 0.15s ease;
   }
 
-  .bar--antarctic {
-    fill: $SunsetOrange;
-  }
-
-  // legend
-  .legend {
-    font-size: 1rem;
-    fill: $Brown;
-  }
-
-  .legend-label {
-    dominant-baseline: middle;
-  }
-
-  .legend-swatch.bar--arctic {
-    fill: $DeepBlue;
-  }
-
-  .legend-swatch.bar--antarctic {
-    fill: $SunsetOrange;
+  .bar:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
   }
 }
