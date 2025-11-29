@@ -7,6 +7,7 @@ import { toTableRows } from '../../back-end/climateTransforms';
 
 import { LineGraph } from '../../components/LineGraph/LineGraph';
 import { BarGraph } from '../../components/BarGraph/BarGraph';
+import { PieGraph } from '../../components/PieGraph/PieGraph';
 
 const DEFAULT_VARIABLE = 'temperature_2m_mean';
 
@@ -46,10 +47,8 @@ function Data() {
 
         setTableRows(rows);
 
-        // Build yearly averages and then anomalies for the line graph
-        const yearly = computeYearlyAveragesFromRows(rows); // [{ label: "2013", value }]
+        const yearly = computeYearlyAveragesFromRows(rows);
         const anomalies = buildAnomalySeries(yearly);
-
         setLineSeries(anomalies);
       } catch (e) {
         console.error(e);
@@ -74,6 +73,11 @@ function Data() {
 
   const decadeAverages = useMemo(
     () => computeDecadeAveragesFromRows(tableRows),
+    [tableRows]
+  );
+
+  const { pieYears, pieDataByYear } = useMemo(
+    () => buildPieDataFromRows(tableRows),
     [tableRows]
   );
 
@@ -122,6 +126,15 @@ function Data() {
               console.log('Bar clicked:', d);
             }}
           />
+        </div>
+      </section>
+
+      <section className="data-page__section">
+        <div className="data-page__panel">
+          <h2 className="data-page__panel-title">
+            Temperature Distribution by Year
+          </h2>
+          <PieGraph years={pieYears} dataByYear={pieDataByYear} />
         </div>
       </section>
     </div>
@@ -202,8 +215,7 @@ function computeDecadeAveragesFromRows(rows) {
     }));
 }
 
-// Build anomaly series from yearly averages
-// baseline = mean of first 3 years (or all if fewer than 3)
+// build anomaly series for line graph
 function buildAnomalySeries(yearly) {
   if (!yearly || yearly.length === 0) return [];
 
@@ -213,9 +225,50 @@ function buildAnomalySeries(yearly) {
     baselineSlice.reduce((acc, d) => acc + d.value, 0) / baselineCount;
 
   return yearly.map((d) => ({
-    date: `${d.label}-01-01`, // one point per year
+    date: `${d.label}-01-01`,
     value: d.value - baselineAvg,
   }));
+}
+
+// pie data: distribution of days in temperature buckets per year
+function buildPieDataFromRows(rows) {
+  const byYearBuckets = new Map();
+
+  rows.forEach((r) => {
+    if (!Number.isFinite(r.value)) return;
+    const year = r.year;
+    if (!byYearBuckets.has(year)) {
+      byYearBuckets.set(year, {
+        '< -15°C': 0,
+        '-15 to -5°C': 0,
+        '-5 to 0°C': 0,
+        '0 to 5°C': 0,
+        '5 to 10°C': 0,
+        '≥ 10°C': 0,
+      });
+    }
+    const buckets = byYearBuckets.get(year);
+    const v = r.value;
+
+    if (v < -15) buckets['< -15°C'] += 1;
+    else if (v < -5) buckets['-15 to -5°C'] += 1;
+    else if (v < 0) buckets['-5 to 0°C'] += 1;
+    else if (v < 5) buckets['0 to 5°C'] += 1;
+    else if (v < 10) buckets['5 to 10°C'] += 1;
+    else buckets['≥ 10°C'] += 1;
+  });
+
+  const years = Array.from(byYearBuckets.keys()).sort((a, b) => a - b);
+  const dataByYear = {};
+
+  years.forEach((year) => {
+    const buckets = byYearBuckets.get(year);
+    dataByYear[year] = Object.entries(buckets)
+      .filter(([, count]) => count > 0)
+      .map(([label, count]) => ({ label, value: count }));
+  });
+
+  return { pieYears: years, pieDataByYear: dataByYear };
 }
 
 export default Data;

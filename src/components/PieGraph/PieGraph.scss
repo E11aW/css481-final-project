@@ -1,0 +1,84 @@
+@import '../../variables.scss';
+
+.pie-graph {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  background: $OffWhite;
+  border: 1px solid $SteelGray;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+  }
+
+  h2 {
+    font-family: $font-heading;
+    color: $DeepBlue;
+    font-size: 2rem;
+    margin-bottom: 4px;
+  }
+
+  &__subtitle {
+    font-family: $font-body;
+    color: $Brown;
+    font-size: 1rem;
+    margin-bottom: 0;
+  }
+
+  &__controls {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  &__slider-label {
+    font-family: $font-body;
+    font-size: 0.9rem;
+    color: $Brown;
+
+    span {
+      font-weight: 600;
+      color: $DeepBlue;
+    }
+  }
+
+  &__slider {
+    width: 160px;
+  }
+
+  &__svg {
+    width: 100%;
+    height: 320px;
+    display: block;
+  }
+
+  .pie-center__value {
+    font-family: $font-heading;
+    font-size: 1.1rem;
+    fill: $DeepBlue;
+    text-anchor: middle;
+  }
+
+  .pie-center__label {
+    font-family: $font-body;
+    font-size: 0.8rem;
+    fill: $Brown;
+    text-anchor: middle;
+  }
+
+  .pie-legend__label {
+    font-family: $font-body;
+    font-size: 0.8rem;
+    fill: $Brown;
+  }
+}
