@@ -5,6 +5,11 @@ import './home.scss';
 import D3HeatMap from '../../components/D3HeatMap/D3HeatMap';
 import { fetchAntarcticaPoints } from '../../back-end/dataSource';
 
+// adjust the path/filename to wherever your image actually is:
+import MapofAntartica from '../../assets/Home/Map-of-Antarctica.png';
+
+import { Button } from '../../components/Button/Button'; // if you have a Button component
+
 function Home() {
   const [points, setPoints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +23,7 @@ function Home() {
         const data = await fetchAntarcticaPoints();
 
         // Handle both shapes:
-        // { note, points: [...] }  OR  just  [...]
+        //   [{...}, {...}]  OR  { note, points: [...] }
         const pts = Array.isArray(data) ? data : data.points || [];
         setPoints(pts);
       } catch (e) {
@@ -52,26 +57,28 @@ function Home() {
             <div className="home__highlight">
               <h3>What you&apos;re seeing</h3>
               <p>
-                Each point on the map represents a location on the continent.
-                Brighter areas indicate stronger climate stress — regions where
+                Each cell on the map represents a region of the continent.
+                Brighter colors indicate stronger climate stress — places where
                 warming and ice loss are most pronounced.
               </p>
             </div>
             <div className="home__highlight">
               <h3>Dig into the data</h3>
               <p>
-                Head to the Data page to explore daily Arctic climate time
-                series, filter by year, and annotate trends with your own notes.
+                Head to the Data page to explore real Arctic climate time series,
+                filter by year, and annotate trends with your own notes.
               </p>
             </div>
           </div>
 
           <div className="home__cta-row">
-            <a className="home__cta-button" href="/data">
-              Explore the data
-            </a>
+            <Button
+              className="home__cta-button"
+              buttonLink="/data"
+              buttonText="Explore the data"
+            />
             <span className="home__cta-note">
-              Live climate data from the Open-Meteo Climate API.
+              Live climate data powered by the Open-Meteo Climate API.
             </span>
           </div>
         </div>
@@ -79,7 +86,7 @@ function Home() {
         <div className="home__hero-visual">
           <div className="home__heatmap-card">
             <div className="home__heatmap-header">
-              <h2>Antarctic Stress Map</h2>
+              <h2>Antarctica Heat Map</h2>
               <p>Relative climate stress across the continent.</p>
             </div>
 
@@ -94,8 +101,12 @@ function Home() {
 
             {!loading && !error && (
               <div className="home__heatmap-wrapper">
-                {/* D3HeatMap expects normalized points: { nx, ny, value } */}
-                <D3HeatMap points={points} />
+                <D3HeatMap
+                  imageSrc={MapofAntartica}
+                  points={points}
+                  normalized={true}
+                  cellSize={28}
+                />
               </div>
             )}
 
@@ -106,9 +117,9 @@ function Home() {
             </div>
 
             <p className="home__heatmap-footnote">
-              This visualization highlights where modeled conditions place the
-              most pressure on Antarctic ice. It&apos;s a simplified view, but a
-              powerful reminder that melting here affects coastlines everywhere.
+              This visualization uses modeled values to highlight regions where
+              conditions place the most pressure on Antarctic ice. Melting here
+              contributes directly to global sea-level rise.
             </p>
           </div>
         </div>
