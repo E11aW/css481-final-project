@@ -10,6 +10,18 @@
   padding: 16px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
   h2 {
     font-family: $font-heading;
     color: $DeepBlue;
@@ -21,7 +33,36 @@
     font-family: $font-body;
     color: $Brown;
     font-size: 1rem;
-    margin-bottom: 8px;
+    margin-bottom: 0;
+  }
+
+  &__controls {
+    display: flex;
+    gap: 6px;
+  }
+
+  &__btn {
+    font-family: $font-body;
+    font-size: 0.9rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid $SteelGray;
+    background: $White;
+    color: $Brown;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+      box-shadow 0.15s ease;
+  }
+
+  &__btn:hover {
+    border-color: $DeepBlue;
+    box-shadow: 0 0 0 1px rgba(92, 132, 182, 0.2);
+  }
+
+  &__btn--active {
+    background: $DeepBlue;
+    color: $White;
+    border-color: $DeepBlue;
   }
 
   .bar-graph__svg {
@@ -45,34 +86,14 @@
     stroke: lighten($SteelGray, 10%);
   }
 
-  // bars
   .bar {
     shape-rendering: crispEdges;
-  }
-
-  .bar--arctic {
     fill: $DeepBlue;
+    transition: opacity 0.15s ease, transform 0.15s ease;
   }
 
-  .bar--antarctic {
-    fill: $SunsetOrange;
-  }
-
-  // legend
-  .legend {
-    font-size: 1rem;
-    fill: $Brown;
-  }
-
-  .legend-label {
-    dominant-baseline: middle;
-  }
-
-  .legend-swatch.bar--arctic {
-    fill: $DeepBlue;
-  }
-
-  .legend-swatch.bar--antarctic {
-    fill: $SunsetOrange;
+  .bar:hover {
+    opacity: 0.85;
+    transform: translateY(-2px);
   }
 }

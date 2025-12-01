@@ -1,54 +1,232 @@
+// src/pages/data.scss
 @import '../../variables.scss';
 
-
 .data-page {
-    padding: 24px;
-    max-width: 1200px;
-    margin: 0 auto;
-}
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: $White;
 
+  &--loading,
+  &--error {
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh;
+  }
 
-.data-page__header {
-    border: 2px solid $DeepBlue;
-    border-radius: 16px;
+  &__error-message {
+    color: #d64545;
+    font-weight: 600;
+    font-family: $font-body;
+  }
+
+  &__section {
+    margin-top: 0.5rem;
+  }
+
+  &__section--graphs {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+
+    @media (min-width: 900px) {
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    }
+  }
+
+  &__panel {
     background: $OffWhite;
-    padding: 20px;
-    margin-bottom: 20px;
-}
+    border-radius: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid $SteelGray;
+  }
 
-
-.data-page__header h1 {
+  &__panel-title {
+    font-size: 1.4rem;
     font-family: $font-heading;
     color: $DeepBlue;
-    font-size: 3rem;
-    line-height: 1.1;
-    margin: 0 0 10px 0;
-    text-transform: uppercase;
-    text-align: left;
-}
+    margin: 0 0 0.25rem;
+  }
 
-
-.data-page__intro {
+  &__panel-subtitle {
     font-family: $font-body;
+    font-size: 1rem;
     color: $Brown;
-}
+    margin: 0 0 0.75rem;
+  }
 
+  // ----- Saved views -----
 
-.data-page__content {
+  &__panel--views {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  &__views-error {
+    font-family: $font-body;
+    font-size: 0.9rem;
+    color: #d64545;
+  }
+
+  &__views-layout {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 1rem;
 
-
-    @media (min-width: 1000px) {
-        grid-template-columns: 1fr 1fr;
+    @media (max-width: 900px) {
+      grid-template-columns: minmax(0, 1fr);
     }
-}
+  }
 
+  &__views-config {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
 
-.data-page__card {
-    border: 2px solid $DeepBlue;
-    border-radius: 16px;
-    background: $OffWhite;
-    padding: 12px;
+  &__views-subtitle {
+    font-family: $font-heading;
+    font-size: 1.1rem;
+    color: $DeepBlue;
+    margin: 0;
+  }
+
+  &__views-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    label {
+      font-family: $font-body;
+      font-size: 0.95rem;
+      color: $Brown;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    input[type='checkbox'] {
+      transform: translateY(1px);
+    }
+  }
+
+  &__views-form {
+    margin-top: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__views-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-family: $font-body;
+    font-size: 0.9rem;
+    color: $Brown;
+
+    input {
+      font-family: $font-body;
+      font-size: 0.9rem;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid $SteelGray;
+      background: $White;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: $DeepBlue;
+      box-shadow: 0 0 0 1px rgba(92, 132, 182, 0.2);
+    }
+  }
+
+  &__views-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+
+    button {
+      font-family: $font-body;
+      font-size: 0.9rem;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid $DeepBlue;
+      background: $DeepBlue;
+      color: $White;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: $White;
+      color: $Brown;
+      border-color: $SteelGray;
+    }
+  }
+
+  &__views-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__views-empty {
+    font-family: $font-body;
+    font-size: 0.95rem;
+    color: $Brown;
+  }
+
+  &__view-card {
+    background: $White;
+    border-radius: 12px;
+    border: 1px solid $SteelGray;
+    padding: 8px 10px;
+  }
+
+  &__view-card--active {
+    border-color: $DeepBlue;
+    box-shadow: 0 0 0 1px rgba(92, 132, 182, 0.2);
+  }
+
+  &__view-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  &__view-name {
+    font-family: $font-body;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $DeepBlue;
+  }
+
+  &__view-actions {
+    display: flex;
+    gap: 4px;
+
+    button {
+      font-family: $font-body;
+      font-size: 0.8rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid $SteelGray;
+      background: $White;
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: $DeepBlue;
+    }
+  }
+
+  &__view-detail {
+    font-family: $font-body;
+    font-size: 0.85rem;
+    color: $Brown;
+  }
 }
