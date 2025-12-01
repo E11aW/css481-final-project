@@ -59,8 +59,10 @@ export const Game = () => {
   const fsBtnRef = useRef(null);
   let snowflakes = [];
   let crackProgress = 0;
-  let melt = 0; // 0 = full ice, 1 = fully melted
-  const meltSpeed = 0.0008; // adjust for difficulty
+  let melt = 0;
+  const meltSpeed = 0.0008;
+  let factAnim = 0;
+  let factAnimSpeed = 6;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -199,7 +201,7 @@ export const Game = () => {
     const baseScrollSpeed = 1.8;
     let actualScrollSpeed = baseScrollSpeed;
     const maxSpeedupFactor = 0.7; // max % to increase speed (e.g. 0.7 => +70% at end)
-    const meterCountDivisor = 0.01; // slow down meter counting without affecting seal movement
+    const meterCountDivisor = 0.01;
     const groundYAt = (worldX) => {
       const a = Math.sin(worldX * 0.004) * 40;
       const b = Math.sin(worldX * 0.012 + 1.2) * 20;
@@ -250,12 +252,10 @@ export const Game = () => {
     // ----- Coin System -----
     let coins = [];
     let coinsCollected = 0;
-    let lastCoinSpawn = 0;
-    let coinSpawnInterval = 6.0; // will be updated by mode
+    let lastSpawnDist = -999;
+    let nextCoinAt = 4; 
     const coinRadius = 12;
-    let factsShown = new Set(); // track which facts have been shown
-    let lastSpawnWorldX = -Infinity;
-    const minCoinGap = 120; // minimum gap between spawns in world coords
+    let factsShown = new Set();
 
     // Demo mode facts (first 2 facts for shorter demo)
     const DEMO_FACTS = CLIMATE_FACTS.slice(0, 2);
@@ -311,14 +311,25 @@ export const Game = () => {
     const spawnCoin = () => {
       // spawn coins at the right edge of the screen (new terrain appearing)
       const screenRightWorldX = scroll + W; // right edge of visible screen in world space
-      let worldX = screenRightWorldX + Math.random() * 60 - 30; // slight variation around right edge
-      // enforce minimum gap from last spawn
-      if (worldX - lastSpawnWorldX < minCoinGap) {
-        worldX = lastSpawnWorldX + minCoinGap + Math.random() * 40;
+      // For the very first coin, place it closer (about 4–6 meters ahead of the seal)
+      let worldX;
+      if (coins.length === 0) {
+        const metersAhead = 4 + Math.random() * 2; // 4–6 meters
+        const pixelsPerMeter = 1 / meterCountDivisor; // e.g. 100 px per meter
+        // place relative to the seal's world X so it arrives near 4–6m into play
+        worldX = scroll + seal.x + metersAhead * pixelsPerMeter;
+        // keep a small random offset so the coin isn't perfectly centered
+        worldX += Math.random() * 40 - 20;
+        // ensure it isn't too far off-screen to the right
+        if (worldX > screenRightWorldX + 120) worldX = screenRightWorldX + 20;
+      } else {
+        // subsequent coins spawn around the right edge as before
+        worldX = screenRightWorldX + Math.random() * 60 - 30; // slight variation around right edge
       }
-      lastSpawnWorldX = worldX;
+      // enforce minimum gap from last spawn (record current distance)
+      lastSpawnDist = Math.floor(scroll * meterCountDivisor);
       const groundY = groundYAt(worldX);
-      const y = groundY - (Math.random() * 80 + 60); // 60-140 units above ground
+      const y = groundY - (40 + Math.random() * 80); // 40–120 above ground
       coins.push({
         x: worldX,
         y: y,
@@ -611,7 +622,6 @@ export const Game = () => {
 
     const restart = (mode = "full") => {
       setGameMode(mode);
-      coinSpawnInterval = coinSpawnIntervalBase;
       scroll = 0;
       seal.y = baseGroundY - 24;
       seal.vy = 0;
@@ -624,6 +634,9 @@ export const Game = () => {
       displayedFact = null;
       factDisplayTime = 0;
       factsShown.clear();
+      // reset coin spawn tracker so first coin appears soon (4-6m)
+      lastSpawnDist = -999;
+      nextCoinAt = 4 + Math.random() * 2;
       gameState = "playing";
       melt = 0;
       // attempt to enter fullscreen to make the experience immersive
@@ -724,12 +737,7 @@ export const Game = () => {
           }
         }
         // update roll angle when pressing and on ground
-        if (pressed && seal.onGround) {
-          rollAngle += actualScrollSpeed * 0.08 * fpsScale * 60; // scale for a nice roll
-        } else {
-          // slowly damp roll angle so seal doesn't snap back
-          rollAngle *= 0.98;
-        }
+        // rollAngle handled in the main update loop so it behaves consistently
         elapsed += dt;
         return; // skip all other updates
       }
@@ -809,15 +817,31 @@ export const Game = () => {
 
         if (justReleased) justReleased = false;
 
-        // ----- Coin Spawning -----
-        lastCoinSpawn += dt;
-        // Only spawn coins if we still need more facts
-        if (
-          factsShown.size + coins.length < targetFactsCount &&
-          lastCoinSpawn >= coinSpawnInterval
-        ) {
+        // ----- Rolling behavior (smaller, smoother, default rolling on ground) -----
+        // Use an angular velocity (radians per second) derived from speed so the
+        // rotation is smooth and minimalistic. The seal rolls whenever it's on
+        // the ground; while in the air the rotation is reset to neutral.
+        if (seal.onGround) {
+          const rollSpeedFactor = 2.5; // radians per unit scroll speed per second (100% faster vs original)
+          const pressedBoost = pressed ? 1.15 : 1; // small boost when holding
+          const rollAngularVel = actualScrollSpeed * rollSpeedFactor * pressedBoost;
+          // integrate angular velocity over time
+          rollAngle += rollAngularVel * dt;
+          // keep angle within reasonable bounds to avoid numeric overflow
+          if (rollAngle > Math.PI) rollAngle -= Math.PI * 2;
+          if (rollAngle < -Math.PI) rollAngle += Math.PI * 2;
+        } else {
+          // in-air: no rotation (seal appears normal while jumping)
+          rollAngle = 0;
+        }
+
+        // ----- NEW Distance-Based Coin Spawning -----
+        const distanceNow = Math.floor(scroll * meterCountDivisor);
+
+        if (distanceNow - lastSpawnDist > nextCoinAt) {
           spawnCoin();
-          lastCoinSpawn = 0;
+          lastSpawnDist = distanceNow;
+          nextCoinAt = 4 + Math.random() * 2; // next coin in 4–6 meters
         }
 
         if (gameState === "playing") {
@@ -879,6 +903,7 @@ export const Game = () => {
 
             // display the fact
             displayedFact = chosenFact;
+            factAnim = 0;
             factDisplayTime = 0;
           }
         });
@@ -932,7 +957,6 @@ export const Game = () => {
       pendingWin = false;
       winParticles = [];
       setGameMode("full");
-      coinSpawnInterval = coinSpawnIntervalBase;
       gameState = "start";
       if (touchBtn) touchBtn.style.display = "none";
       winParticles = [];
@@ -1454,16 +1478,23 @@ export const Game = () => {
       // Draw Seal
       if (spritesLoad) {
         const s = seal;
-        const img = pressed ? rollSprite : sealSprite;
+        // Use rolling sprite when on the ground (default rolling), and the
+        // regular seal sprite while in the air (jumping).
+        const img = s.onGround ? rollSprite : sealSprite;
         // keep the sprite at a consistent height and preserve its natural aspect ratio
         const drawH = s.r * 2 * 1.25;
-        const ratio = pressed ? rollRatio : sealRatio;
+        const ratio = s.onGround ? rollRatio : sealRatio;
         const drawW = drawH * ratio;
         ctx.save();
         ctx.translate(s.x, s.y);
-        // rotate when pressed (rolling), otherwise slight bob rotation to look lively
-        if (pressed && s.onGround) ctx.rotate(rollAngle);
-        else ctx.rotate(Math.sin(elapsed * 6) * 0.03);
+        // rotate when pressed and on ground (rolling)
+        if (s.onGround) {
+          if (pressed) ctx.rotate(rollAngle);
+          else ctx.rotate(Math.sin(elapsed * 6) * 0.03);
+        } else {
+          // in air: don't rotate (still)
+          ctx.rotate(0);
+        }
         ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
         ctx.restore();
       }
@@ -1494,81 +1525,91 @@ export const Game = () => {
         }
       });
 
-      // Draw Fact Display
+      // Fun Fact Helper
+      function wrapTextToLines(ctx, text, maxWidth, maxLines = 2) {
+        const words = text.split(" ");
+        const lines = [""];
+        let lineIndex = 0;
+
+        for (let w of words) {
+          const testLine = lines[lineIndex] + w + " ";
+          const width = ctx.measureText(testLine).width;
+
+          if (width > maxWidth && lineIndex < maxLines - 1) {
+            lineIndex++;
+            lines[lineIndex] = w + " ";
+          } else {
+            lines[lineIndex] = testLine;
+          }
+        }
+        return lines.map((l) => l.trim());
+      }
+
+      // ----- FUN FACT OVERLAY (Modern UI) -----
       if (displayedFact !== null) {
-        const alpha = Math.min(
-          1,
-          (factDisplayDuration - factDisplayTime) * 0.5
-        ); // fade out at end
+        // Fade the world behind
         ctx.save();
-        // semi-transparent background
-        ctx.fillStyle = `rgba(20, 100, 150, ${0.85 * alpha})`;
+        ctx.fillStyle = "rgba(0, 40, 70, 0.45)";
         ctx.fillRect(0, 0, W, H);
-        // fact box
-        const boxWidth = Math.min(W * 0.8, 500);
-        const boxHeight = 140;
-        const boxX = (W - boxWidth) / 2;
-        const boxY = H / 2 - boxHeight / 2;
-        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-        // add a subtle background with seal icon
-        ctx.beginPath();
-        roundRect(ctx, boxX, boxY, boxWidth, boxHeight, 12);
+        ctx.restore();
+
+        // Animate popup scale
+        factAnim += 0.08;
+        const popScale = Math.min(1, factAnim);
+
+        const cardW = Math.min(W * 0.78, 520);
+        const cardH = 200;
+        const cardX = (W - cardW) / 2;
+        const cardY = H * 0.5 - cardH / 2;
+
+        ctx.save();
+        ctx.translate(W / 2, H / 2);
+        ctx.scale(popScale, popScale);
+        ctx.translate(-W / 2, -H / 2);
+
+        // Card background
+        ctx.save();
+        ctx.shadowColor = "rgba(0,0,0,0.14)";
+        ctx.shadowBlur = 24;
+        ctx.fillStyle = "white";
+        roundRect(ctx, cardX, cardY, cardW, cardH, 20);
         ctx.fill();
-        // border
-        ctx.strokeStyle = `rgba(15, 154, 214, ${alpha})`;
-        ctx.lineWidth = 3;
-        ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
-        // text
-        ctx.fillStyle = `rgba(${parseInt(
-          COLORS.titleDark.slice(1, 3),
-          16
-        )}, ${parseInt(COLORS.titleDark.slice(3, 5), 16)}, ${parseInt(
-          COLORS.titleDark.slice(5, 7),
-          16
-        )}, ${alpha})`;
-        ctx.font = "bold 18px 'Segoe UI', sans-serif";
+        ctx.restore();
+
+        // Header pill
+        const pillW = 150;
+        const pillH = 36;
+        const pillX = W / 2 - pillW / 2;
+        const pillY = cardY - 22;
+
+        ctx.save();
+        ctx.fillStyle = "#0a82b4";
+        roundRect(ctx, pillX, pillY, pillW, pillH, 18);
+        ctx.fill();
+        ctx.font = "bold 16px 'Segoe UI'";
+        ctx.fillStyle = "white";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        // wrap text to 2 lines max
-        const words = displayedFact.split(" ");
-        let line1 = "",
-          line2 = "";
-        words.forEach((word, idx) => {
-          if (idx < Math.ceil(words.length / 2)) {
-            line1 += word + " ";
-          } else {
-            line2 += word + " ";
-          }
-        });
-        ctx.fillStyle = `rgba(${parseInt(
-          COLORS.titleBlue.slice(1, 3),
-          16
-        )}, ${parseInt(COLORS.titleBlue.slice(3, 5), 16)}, ${parseInt(
-          COLORS.titleBlue.slice(5, 7),
-          16
-        )}, ${alpha})`;
-        ctx.font = "bold 14px 'Segoe UI', sans-serif";
-        ctx.fillText("🦭 Fun Fact", boxX + 18, boxY + 28);
-        ctx.fillStyle = `rgba(${parseInt(
-          COLORS.titleDark.slice(1, 3),
-          16
-        )}, ${parseInt(COLORS.titleDark.slice(3, 5), 16)}, ${parseInt(
-          COLORS.titleDark.slice(5, 7),
-          16
-        )}, ${alpha})`;
-        ctx.font = "bold 18px 'Segoe UI', sans-serif";
-        ctx.fillText(line1.trim(), W / 2, boxY + boxHeight / 2 - 20);
-        ctx.fillText(line2.trim(), W / 2, boxY + boxHeight / 2 + 20);
-        // helper: small rounded rectangle function
-        function roundRect(ctx, x, y, width, height, radius) {
-          ctx.beginPath();
-          ctx.moveTo(x + radius, y);
-          ctx.arcTo(x + width, y, x + width, y + height, radius);
-          ctx.arcTo(x + width, y + height, x, y + height, radius);
-          ctx.arcTo(x, y + height, x, y, radius);
-          ctx.arcTo(x, y, x + width, y, radius);
-          ctx.closePath();
-        }
+        ctx.fillText("🦭 FUN FACT", W / 2, pillY + pillH / 2);
+        ctx.restore();
+
+        // Text
+        ctx.fillStyle = COLORS.titleDark;
+        ctx.font = "20px 'Segoe UI', sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const maxWidth = cardW - 40;
+        const lines = wrapTextToLines(ctx, displayedFact, maxWidth, 2);
+
+        ctx.fillText(lines[0], W / 2, cardY + cardH / 2 - 20);
+        if (lines[1]) ctx.fillText(lines[1], W / 2, cardY + cardH / 2 + 15);
+
+        // "Click to continue…" hint
+        ctx.font = "14px 'Segoe UI'";
+        ctx.fillStyle = "rgba(0,0,0,0.45)";
+        ctx.fillText("Click to continue…", W / 2, cardY + cardH - 18);
+
         ctx.restore();
       }
 
