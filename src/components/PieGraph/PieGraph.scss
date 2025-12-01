@@ -56,10 +56,47 @@
     width: 160px;
   }
 
+  &__body {
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr);
+    gap: 12px;
+
+    @media (max-width: 900px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  &__chart-area {
+    position: relative;
+    min-height: 280px;
+  }
+
   &__svg {
     width: 100%;
     height: 320px;
     display: block;
+  }
+
+  &__empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+
+    p {
+      font-family: $font-body;
+      font-size: 0.95rem;
+      color: $Brown;
+      text-align: center;
+      max-width: 260px;
+    }
+
+    strong {
+      color: $DeepBlue;
+    }
   }
 
   .pie-center__value {
@@ -80,5 +117,128 @@
     font-family: $font-body;
     font-size: 0.8rem;
     fill: $Brown;
+  }
+
+  &__ranges {
+    background: $White;
+    border-radius: 12px;
+    border: 1px solid $SteelGray;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__ranges-title {
+    font-family: $font-heading;
+    font-size: 1.1rem;
+    color: $DeepBlue;
+    margin: 0;
+  }
+
+  &__ranges-help {
+    font-family: $font-body;
+    font-size: 0.85rem;
+    color: $Brown;
+
+    code {
+      font-family: monospace;
+      background: $OffWhite;
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+  }
+
+  &__ranges-empty {
+    font-family: $font-body;
+    font-size: 0.9rem;
+    color: $Brown;
+  }
+
+  &__range-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) 1fr 1fr auto;
+    gap: 6px;
+    align-items: center;
+
+    @media (max-width: 700px) {
+      grid-template-columns: minmax(0, 1.5fr) 1fr 1fr;
+      grid-template-rows: auto auto;
+
+      .pie-graph__btn--delete {
+        grid-column: 1 / -1;
+        justify-self: flex-end;
+      }
+    }
+  }
+
+  &__range-input {
+    font-family: $font-body;
+    font-size: 0.9rem;
+    padding: 4px 6px;
+    border-radius: 8px;
+    border: 1px solid $SteelGray;
+    background: $OffWhite;
+  }
+
+  &__range-input--label {
+    min-width: 0;
+  }
+
+  &__range-input:focus {
+    outline: none;
+    border-color: $DeepBlue;
+    box-shadow: 0 0 0 1px rgba(92, 132, 182, 0.2);
+  }
+
+  &__ranges-buttons {
+    margin-top: 4px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  &__btn {
+    font-family: $font-body;
+    font-size: 0.85rem;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid $SteelGray;
+    background: $White;
+    color: $Brown;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease,
+      border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  &__btn--add {
+    border-color: $DeepBlue;
+  }
+
+  &__btn--add:hover {
+    background: $DeepBlue;
+    color: $White;
+  }
+
+  &__btn--save {
+    border-color: $SunsetOrange;
+    background: $SunsetOrange;
+    color: $White;
+  }
+
+  &__btn--save:hover {
+    box-shadow: 0 0 0 1px rgba(246, 174, 141, 0.4);
+  }
+
+  &__btn--delete {
+    border-color: $SteelGray;
+    background: $White;
+    color: $Brown;
+  }
+
+  &__btn--delete:hover {
+    border-color: $SunsetOrange;
+    color: $SunsetOrange;
   }
 }
