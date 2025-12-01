@@ -20,14 +20,56 @@ const DEFAULT_QUERY = {
   variable: DEFAULT_VARIABLE,
 };
 
+// ---------- localStorage helpers for saved views ----------
+const VIEWS_STORAGE_KEY = 'climateDashboardViews';
+
+function loadViewsFromStorage() {
+  try {
+    const raw = window.localStorage.getItem(VIEWS_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed;
+  } catch {
+    return [];
+  }
+}
+
+function saveViewsToStorage(views) {
+  try {
+    window.localStorage.setItem(VIEWS_STORAGE_KEY, JSON.stringify(views));
+  } catch {
+    // ignore
+  }
+}
+
 function Data() {
   const [tableRows, setTableRows] = useState([]);
   const [lineSeries, setLineSeries] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const [queryParams] = useState(DEFAULT_QUERY);
 
+  // Which graphs are currently visible
+  const [showLineGraph, setShowLineGraph] = useState(true);
+  const [showBarGraph, setShowBarGraph] = useState(true);
+  const [showPieGraph, setShowPieGraph] = useState(true);
+
+  // Saved views (CRUD)
+  const [views, setViews] = useState([]);
+  const [selectedViewId, setSelectedViewId] = useState(null);
+  const [viewDraftName, setViewDraftName] = useState('');
+  const [viewsError, setViewsError] = useState(null);
+
+  // Load saved views once
+  useEffect(() => {
+    const stored = loadViewsFromStorage();
+    setViews(stored);
+  }, []);
+
+  // Load climate data
   useEffect(() => {
     async function load() {
       setLoading(true);
@@ -52,7 +94,7 @@ function Data() {
         setLineSeries(anomalies);
       } catch (e) {
         console.error(e);
-        setError(e.message || 'Failed to load data');
+        setError(e.message || 'Failed to load climate data');
       } finally {
         setLoading(false);
       }
@@ -81,6 +123,91 @@ function Data() {
     [tableRows]
   );
 
+  // ---------- Saved views CRUD logic ----------
+
+  // A "view" is: which graphs are visible
+  // {
+  //   id: number,
+  //   name: string,
+  //   showLine: boolean,
+  //   showBar: boolean,
+  //   showPie: boolean,
+  //   createdAt: string
+  // }
+
+  function handleSaveView() {
+    setViewsError(null);
+
+    const trimmedName = viewDraftName.trim();
+    if (!trimmedName) {
+      setViewsError('Please provide a name for the view.');
+      return;
+    }
+
+    const now = new Date().toISOString();
+
+    if (selectedViewId == null) {
+      // CREATE
+      const newView = {
+        id: Date.now(),
+        name: trimmedName,
+        showLine: showLineGraph,
+        showBar: showBarGraph,
+        showPie: showPieGraph,
+        createdAt: now,
+      };
+      const next = [...views, newView];
+      setViews(next);
+      saveViewsToStorage(next);
+      setSelectedViewId(newView.id);
+    } else {
+      // UPDATE existing
+      const next = views.map((v) =>
+        v.id === selectedViewId
+          ? {
+              ...v,
+              name: trimmedName,
+              showLine: showLineGraph,
+              showBar: showBarGraph,
+              showPie: showPieGraph,
+            }
+          : v
+      );
+      setViews(next);
+      saveViewsToStorage(next);
+    }
+  }
+
+  function handleSelectView(id) {
+    setViewsError(null);
+    setSelectedViewId(id);
+    const v = views.find((view) => view.id === id);
+    if (!v) return;
+    setViewDraftName(v.name);
+    setShowLineGraph(v.showLine);
+    setShowBarGraph(v.showBar);
+    setShowPieGraph(v.showPie);
+  }
+
+  function handleDeleteView(id) {
+    setViewsError(null);
+    const next = views.filter((v) => v.id !== id);
+    setViews(next);
+    saveViewsToStorage(next);
+    if (selectedViewId === id) {
+      setSelectedViewId(null);
+      setViewDraftName('');
+    }
+  }
+
+  function handleNewViewDraft() {
+    setViewsError(null);
+    setSelectedViewId(null);
+    setViewDraftName('');
+  }
+
+  // ---------- page states ----------
+
   if (loading) {
     return (
       <div className="data-page data-page--loading">
@@ -99,49 +226,190 @@ function Data() {
 
   return (
     <div className="data-page">
+      {/* graph row */}
       <section className="data-page__section data-page__section--graphs">
-        <div className="data-page__panel">
-          <h2 className="data-page__panel-title">
-            Yearly Temperature Anomaly
-          </h2>
-          <LineGraph
-            data={lineSeries}
-            metricLabel="Difference from 2013–2015 average (°C)"
-            onPointClick={(date, value) => {
-              console.log('Line point clicked:', date, value);
-            }}
-          />
-        </div>
+        {showLineGraph && (
+          <div className="data-page__panel">
+            <h2 className="data-page__panel-title">
+              Yearly Temperature Anomaly
+            </h2>
+            <p className="data-page__panel-subtitle">
+              Difference from 2013–2015 average (°C) at 78.2°N, 15.6°E.
+            </p>
+            <LineGraph
+              data={lineSeries}
+              metricLabel="Anomaly vs 2013–2015 (°C)"
+            />
+          </div>
+        )}
 
-        <div className="data-page__panel">
-          <h2 className="data-page__panel-title">
-            Temperature Averages – Months / Years / Decades
-          </h2>
-          <BarGraph
-            monthlyData={monthlyAverages}
-            yearlyData={yearlyAverages}
-            decadeData={decadeAverages}
-            subtitle="Mean temperature (°C)"
-            onBarClick={(d) => {
-              console.log('Bar clicked:', d);
-            }}
-          />
-        </div>
+        {showBarGraph && (
+          <div className="data-page__panel">
+            <h2 className="data-page__panel-title">
+              Temperature Averages – Months / Years / Decades
+            </h2>
+            <BarGraph
+              monthlyData={monthlyAverages}
+              yearlyData={yearlyAverages}
+              decadeData={decadeAverages}
+              subtitle="Mean temperature (°C)"
+            />
+          </div>
+        )}
       </section>
 
+      {showPieGraph && (
+        <section className="data-page__section">
+          <div className="data-page__panel">
+            <h2 className="data-page__panel-title">
+              Temperature Distribution by Year
+            </h2>
+            <p className="data-page__panel-subtitle">
+              For each year, the share of days falling in different temperature
+              ranges.
+            </p>
+            <PieGraph years={pieYears} dataByYear={pieDataByYear} />
+          </div>
+        </section>
+      )}
+
+      {/* Saved Views (CRUD) */}
       <section className="data-page__section">
-        <div className="data-page__panel">
-          <h2 className="data-page__panel-title">
-            Temperature Distribution by Year
-          </h2>
-          <PieGraph years={pieYears} dataByYear={pieDataByYear} />
+        <div className="data-page__panel data-page__panel--views">
+          <h2 className="data-page__panel-title">Saved Dashboard Views</h2>
+          <p className="data-page__panel-subtitle">
+            Configure which graphs are visible, then save that setup as a view.
+            You can create, read, update, and delete these views below.
+          </p>
+
+          {viewsError && (
+            <p className="data-page__views-error">{viewsError}</p>
+          )}
+
+          <div className="data-page__views-layout">
+            {/* Left: current config + form */}
+            <div className="data-page__views-config">
+              <h3 className="data-page__views-subtitle">
+                Current Graph Selection
+              </h3>
+
+              <div className="data-page__views-toggles">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={showLineGraph}
+                    onChange={(e) => setShowLineGraph(e.target.checked)}
+                  />
+                  Line graph: anomaly over time
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={showBarGraph}
+                    onChange={(e) => setShowBarGraph(e.target.checked)}
+                  />
+                  Bar graph: monthly/yearly/decade averages
+                </label>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={showPieGraph}
+                    onChange={(e) => setShowPieGraph(e.target.checked)}
+                  />
+                  Pie chart: temperature distribution by year
+                </label>
+              </div>
+
+              <div className="data-page__views-form">
+                <h3 className="data-page__views-subtitle">
+                  {selectedViewId == null ? 'Create New View' : 'Edit View'}
+                </h3>
+                <label className="data-page__views-label">
+                  View name
+                  <input
+                    type="text"
+                    placeholder="e.g. Line + Pie only"
+                    value={viewDraftName}
+                    onChange={(e) => setViewDraftName(e.target.value)}
+                  />
+                </label>
+
+                <div className="data-page__views-buttons">
+                  <button type="button" onClick={handleSaveView}>
+                    {selectedViewId == null ? 'Save View' : 'Update View'}
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={handleNewViewDraft}
+                  >
+                    New
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: list of saved views */}
+            <div className="data-page__views-list">
+              <h3 className="data-page__views-subtitle">Saved Views</h3>
+              {views.length === 0 ? (
+                <p className="data-page__views-empty">
+                  No saved views yet. Configure which graphs you want to see,
+                  give it a name, and click "Save View".
+                </p>
+              ) : (
+                views
+                  .slice()
+                  .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''))
+                  .map((view) => (
+                    <article
+                      key={view.id}
+                      className={
+                        view.id === selectedViewId
+                          ? 'data-page__view-card data-page__view-card--active'
+                          : 'data-page__view-card'
+                      }
+                    >
+                      <header className="data-page__view-header">
+                        <span className="data-page__view-name">
+                          {view.name}
+                        </span>
+                        <div className="data-page__view-actions">
+                          <button
+                            type="button"
+                            onClick={() => handleSelectView(view.id)}
+                          >
+                            Apply
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteView(view.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </header>
+                      <p className="data-page__view-detail">
+                        {view.showLine ? 'Line' : ''}
+                        {view.showBar ? (view.showLine ? ' · Bar' : 'Bar') : ''}
+                        {view.showPie
+                          ? (view.showLine || view.showBar
+                              ? ' · Pie'
+                              : 'Pie')
+                          : ''}
+                      </p>
+                    </article>
+                  ))
+              )}
+            </div>
+          </div>
         </div>
       </section>
     </div>
   );
 }
 
-// ---------- helpers ----------
+// ---------- helpers (same as before) ----------
 
 function computeYearlyAveragesFromRows(rows) {
   const byYear = new Map();
@@ -215,7 +483,6 @@ function computeDecadeAveragesFromRows(rows) {
     }));
 }
 
-// build anomaly series for line graph
 function buildAnomalySeries(yearly) {
   if (!yearly || yearly.length === 0) return [];
 
@@ -230,7 +497,6 @@ function buildAnomalySeries(yearly) {
   }));
 }
 
-// pie data: distribution of days in temperature buckets per year
 function buildPieDataFromRows(rows) {
   const byYearBuckets = new Map();
 
@@ -264,8 +530,8 @@ function buildPieDataFromRows(rows) {
   years.forEach((year) => {
     const buckets = byYearBuckets.get(year);
     dataByYear[year] = Object.entries(buckets)
-      .filter(([, count]) => count > 0)
-      .map(([label, count]) => ({ label, value: count }));
+      .filter(([, value]) => value > 0)
+      .map(([label, value]) => ({ label, value }));
   });
 
   return { pieYears: years, pieDataByYear: dataByYear };
