@@ -1,3 +1,4 @@
+// src/components/PieGraph/PieGraph.js
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
 import "./PieGraph.scss";
@@ -5,12 +6,11 @@ import "./PieGraph.scss";
 /**
  * Props:
  *  - rows: [{ year: number, value: number }]
- *    (you can pass your tableRows; only year + value are used)
  */
 export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
   const svgRef = useRef(null);
 
-  // -------- derive available years from data --------
+  // ---------- years from data ----------
   const years = useMemo(() => {
     const set = new Set();
     rows.forEach((r) => {
@@ -22,16 +22,17 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
   const [year, setYear] = useState(null);
 
   useEffect(() => {
-    if (years.length === 0) return;
+    if (!years.length) return;
     if (year == null || !years.includes(year)) {
-      setYear(years[years.length - 1]); // default to last (latest) year
+      setYear(years[years.length - 1]);
     }
   }, [years, year]);
 
-  // -------- bucket / range CRUD state --------
+  // ---------- ranges + errors ----------
   const [ranges, setRanges] = useState([]);
+  const [rangesError, setRangesError] = useState(null);
 
-  // load saved ranges from localStorage (if any)
+  // load saved ranges
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem("pieTemperatureRanges");
@@ -46,76 +47,125 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
     }
   }, []);
 
-  const saveRangesToStorage = (nextRanges) => {
-    setRanges(nextRanges);
+  const saveRangesToStorage = (next) => {
+    setRanges(next);
     try {
       window.localStorage.setItem(
         "pieTemperatureRanges",
-        JSON.stringify(nextRanges)
+        JSON.stringify(next)
       );
     } catch {
       // ignore
     }
   };
 
-  // handler: add new blank range
+  // helper: pretty default label from min/max
+  function formatRangeLabel(min, max) {
+    const hasMin = min != null;
+    const hasMax = max != null;
+    if (hasMin && hasMax) return `${min} to ${max}°C`;
+    if (hasMin && !hasMax) return `≥ ${min}°C`;
+    if (!hasMin && hasMax) return `< ${max}°C`;
+    return "All temperatures";
+  }
+
+  // ---------- CRUD handlers ----------
   const handleAddRange = () => {
+    setRangesError(null);
     const newRange = {
       id: Date.now(),
       label: "New range",
       min: "",
       max: "",
     };
-    const next = [...ranges, newRange];
-    setRanges(next);
+    setRanges((prev) => [...prev, newRange]);
   };
 
-  // handler: update a field of a range
   const handleChangeRangeField = (id, field, value) => {
-    const next = ranges.map((r) =>
-      r.id === id ? { ...r, [field]: value } : r
+    setRangesError(null);
+    setRanges((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, [field]: value } : r))
     );
-    setRanges(next);
   };
 
-  // handler: delete range
   const handleDeleteRange = (id) => {
+    setRangesError(null);
     const next = ranges.filter((r) => r.id !== id);
     saveRangesToStorage(next);
   };
 
-  // handler: save all ranges (persist to localStorage)
   const handleSaveRanges = () => {
-    // sanitize min/max as numbers or null
+    setRangesError(null);
+
     const cleaned = ranges
       .map((r) => {
         const minNum =
           r.min === "" || r.min == null ? null : Number(r.min);
         const maxNum =
           r.max === "" || r.max == null ? null : Number(r.max);
+
         if (
           (minNum != null && Number.isNaN(minNum)) ||
           (maxNum != null && Number.isNaN(maxNum))
         ) {
+          setRangesError("Min and Max must be valid numbers or blank.");
           return null;
         }
+
+        if (minNum != null && maxNum != null && minNum >= maxNum) {
+          setRangesError("For each range, Min must be less than Max.");
+          return null;
+        }
+
+        const trimmedLabel = (r.label || "").trim();
+        const label =
+          trimmedLabel && trimmedLabel !== "New range"
+            ? trimmedLabel
+            : formatRangeLabel(minNum, maxNum);
+
         return {
           id: r.id,
-          label: r.label || "Range",
+          label,
           min: minNum,
           max: maxNum,
         };
       })
       .filter(Boolean);
+
+    if (!cleaned.length) {
+      saveRangesToStorage([]);
+      return;
+    }
+
+    // no-overlap check (no range within / overlapping another)
+    const intervals = cleaned
+      .map((r) => ({
+        ...r,
+        effMin: r.min == null ? -Infinity : r.min,
+        effMax: r.max == null ? Infinity : r.max,
+      }))
+      .sort((a, b) => a.effMin - b.effMin);
+
+    for (let i = 1; i < intervals.length; i++) {
+      if (intervals[i].effMin < intervals[i - 1].effMax) {
+        setRangesError(
+          "Ranges cannot overlap or sit inside each other. Adjust Min/Max so each range is distinct."
+        );
+        return;
+      }
+    }
+
     saveRangesToStorage(cleaned);
   };
 
-  // -------- compute current year's bucketed data based on ranges --------
+  // ---------- compute bucketed data ----------
   const currentYearData = useMemo(() => {
-    if (year == null || rows.length === 0 || ranges.length === 0) return [];
+    if (year == null || !rows.length || !ranges.length) return [];
 
-    const yearRows = rows.filter((r) => r.year === year && Number.isFinite(r.value));
-    if (yearRows.length === 0) return [];
+    const yearRows = rows.filter(
+      (r) => r.year === year && Number.isFinite(r.value)
+    );
+    if (!yearRows.length) return [];
 
     const buckets = ranges.map((r) => ({
       id: r.id,
@@ -140,7 +190,7 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
     return buckets.filter((b) => b.count > 0);
   }, [rows, ranges, year]);
 
-  // -------- D3 render --------
+  // ---------- D3 render ----------
   useEffect(() => {
     const svg = d3
       .select(svgRef.current)
@@ -149,10 +199,7 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
 
     svg.selectAll("*").remove();
 
-    if (!currentYearData.length) {
-      // nothing to draw
-      return;
-    }
+    if (!currentYearData.length) return;
 
     const margin = { top: 8, right: 8, bottom: 8, left: 8 };
     const innerW = width - margin.left - margin.right;
@@ -165,6 +212,11 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
         "transform",
         `translate(${margin.left + innerW / 2},${margin.top + innerH / 2})`
       );
+
+    const total = d3.sum(currentYearData, (x) => x.count) || 1;
+    const percentByLabel = new Map(
+      currentYearData.map((d) => [d.label, (d.count / total) * 100])
+    );
 
     const pieGen = d3
       .pie()
@@ -203,16 +255,13 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
       .attr("d", arc)
       .attr("fill", (d) => color(d.data.label));
 
-    // tooltip via <title>
     arcs
       .append("title")
       .text((d) => {
-        const total = d3.sum(currentYearData, (x) => x.count) || 1;
-        const pct = (100 * (d.data.count / total)).toFixed(1);
-        return `${d.data.label}: ${d.data.count} days (${pct}%)`;
+        const pct = percentByLabel.get(d.data.label) || 0;
+        return `${d.data.label}: ${d.data.count} days (${pct.toFixed(1)}%)`;
       });
 
-    // hover enlarge
     arcs
       .on("mouseenter", function (_, d) {
         d3.select(this).transition().duration(150).attr("d", arcHover(d));
@@ -221,17 +270,18 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
         d3.select(this).transition().duration(150).attr("d", arc(d));
       });
 
-    // center label
-    const total = d3.sum(currentYearData, (x) => x.count) || 1;
     const top = [...currentYearData].sort((a, b) => b.count - a.count)[0];
 
     if (top) {
       const center = g.append("g").attr("class", "pie-center");
+      const pct = percentByLabel.get(top.label) || 0;
+
       center
         .append("text")
         .attr("class", "pie-center__value")
         .attr("y", -4)
-        .text(`${((top.count / total) * 100).toFixed(1)}%`);
+        .text(`${pct.toFixed(1)}%`);
+
       center
         .append("text")
         .attr("class", "pie-center__label")
@@ -239,7 +289,7 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
         .text(top.label);
     }
 
-    // simple legend
+    // legend with explicit percentages
     const legend = svg
       .append("g")
       .attr(
@@ -250,6 +300,8 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
 
     let lx = 0;
     currentYearData.forEach((d) => {
+      const pct = percentByLabel.get(d.label) || 0;
+
       const item = legend
         .append("g")
         .attr("transform", `translate(${lx},0)`);
@@ -267,7 +319,7 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
         .attr("x", 14)
         .attr("y", 9)
         .attr("class", "pie-legend__label")
-        .text(d.label);
+        .text(`${d.label} – ${pct.toFixed(1)}%`);
 
       lx += item.node().getBBox().width + 12;
     });
@@ -300,8 +352,8 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
         <div>
           <h2>Temperature Distribution by Year</h2>
           <p className="pie-graph__subtitle">
-            Start by adding your own temperature ranges below, then use the
-            year slider to see the distribution.
+            Add ranges below, then use the year slider to see what percentage of
+            days fall into each range.
           </p>
         </div>
         <div className="pie-graph__controls">
@@ -325,8 +377,8 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
           {!chartHasData ? (
             <div className="pie-graph__empty">
               <p>
-                No ranges defined or no data for the selected year. Add ranges
-                below and click <strong>Save Ranges</strong> to see the chart.
+                No matching data for the selected year and ranges. Add ranges
+                and click <strong>Save Ranges</strong>, then check the year.
               </p>
             </div>
           ) : (
@@ -339,9 +391,14 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
             Manage Temperature Ranges (CRUD)
           </h3>
           <p className="pie-graph__ranges-help">
-            Each range uses <code>min ≤ value &lt; max</code>. Leave min or max
-            blank to make it open-ended.
+            Ranges cannot overlap. Each range uses{" "}
+            <code>min ≤ value &lt; max</code>. Leave Min or Max blank to make it
+            open-ended.
           </p>
+
+          {rangesError && (
+            <p className="pie-graph__ranges-error">{rangesError}</p>
+          )}
 
           {ranges.length === 0 ? (
             <p className="pie-graph__ranges-empty">

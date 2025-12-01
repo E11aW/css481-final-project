@@ -241,4 +241,10 @@
     border-color: $SunsetOrange;
     color: $SunsetOrange;
   }
+
+    &__ranges-error {
+    font-family: $font-body;
+    font-size: 0.85rem;
+    color: #d64545;
+  }
 }
