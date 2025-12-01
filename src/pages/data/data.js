@@ -98,11 +98,11 @@ function Data() {
         <div className="data-page__panel">
           <h2 className="data-page__panel-title">Yearly Temperature Anomaly</h2>
           <p className="data-page__panel-subtitle">
-            Difference from 2013–2015 average (°C) at 78.2°N, 15.6°E.
+            Shows how the average temperature deviates from typical climate conditions for that period.
           </p>
           <LineGraph
             data={lineSeries}
-            metricLabel="Anomaly vs 2013–2015 (°C)"
+            metricLabel="Temperature anomaly (°C)"
           />
         </div>
 
@@ -127,8 +127,7 @@ function Data() {
           </h2>
           <p className="data-page__panel-subtitle">
             Use the controls inside this panel to create, edit, and delete your
-            own temperature ranges. The pie chart updates based on your ranges
-            (CRUD within the graph).
+            own temperature ranges. The pie chart updates based on your ranges.
           </p>
           <PieGraph rows={tableRows} />
         </div>

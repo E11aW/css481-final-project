@@ -158,15 +158,16 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
     saveRangesToStorage(cleaned);
   };
 
-  // ---------- compute bucketed data ----------
-  const currentYearData = useMemo(() => {
+const currentYearData = useMemo(() => {
     if (year == null || !rows.length || !ranges.length) return [];
 
+    // all days for selected year
     const yearRows = rows.filter(
       (r) => r.year === year && Number.isFinite(r.value)
     );
     if (!yearRows.length) return [];
 
+    // start with user-defined ranges
     const buckets = ranges.map((r) => ({
       id: r.id,
       label: r.label || "Range",
@@ -175,6 +176,7 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
       count: 0,
     }));
 
+    // count days into the first matching range
     yearRows.forEach((r) => {
       const v = r.value;
       for (const b of buckets) {
@@ -187,6 +189,23 @@ export const PieGraph = ({ rows = [], width = 360, height = 320 }) => {
       }
     });
 
+    // compute "Other temperatures" = any days not captured by a range
+    const matchedTotal = buckets.reduce((sum, b) => sum + b.count, 0);
+    const totalDays = yearRows.length;
+    const otherCount = Math.max(totalDays - matchedTotal, 0);
+
+    if (otherCount > 0) {
+      buckets.push({
+        id: "__other",
+        label: "Other",
+        min: null,
+        max: null,
+        count: otherCount,
+        isOther: true,
+      });
+    }
+
+    // only show buckets that actually have days
     return buckets.filter((b) => b.count > 0);
   }, [rows, ranges, year]);
 
