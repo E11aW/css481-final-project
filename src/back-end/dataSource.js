@@ -1,54 +1,73 @@
 // src/back-end/dataSource.js
 
-// Point this at localhost in dev and your deployed API in production.
-// On Vercel, set REACT_APP_API_BASE to something like:
-//   https://your-api-service.onrender.com/api
+// In production (Vercel), set REACT_APP_API_BASE to:
+//   https://tip-of-the-iceberg.onrender.com/api
+// Locally, this falls back to your dev backend at http://localhost:4000/api
 const API_BASE =
   process.env.REACT_APP_API_BASE || 'http://localhost:4000/api';
 
-// ---- CLIMATE DATA (Open-Meteo via backend proxy) ----
-//
-// params example:
-// {
-//   lat: 78.2,
-//   lon: 15.6,
-//   start: '2013-01-01',
-//   end: '2024-12-31',
-//   model: 'CMCC_CM2_VHR4',
-//   variable: 'temperature_2m_mean',
-// }
+/**
+ * Fetch daily climate data via our backend proxy.
+ *
+ * params example:
+ * {
+ *   lat: 78.2,
+ *   lon: 15.6,
+ *   start: '2013-01-01',
+ *   end: '2024-12-31',
+ *   model: 'CMCC_CM2_VHR4',
+ *   variable: 'temperature_2m_mean',
+ *   timezone: 'UTC',
+ * }
+ */
 export async function fetchDailyClimate(params = {}) {
   const query = new URLSearchParams(params).toString();
   const res = await fetch(`${API_BASE}/climate/daily?${query}`);
+
   if (!res.ok) {
     throw new Error(`Climate API error: ${res.status}`);
   }
-  return res.json(); // full Open-Meteo response
-}
 
-// ---- ANTARCTICA HEATMAP POINTS ----
-//
-// Returns whatever your backend sends from antarctica_points.json.
-// Usually:
-//   [{ nx, ny, value }, ...]  OR  { points: [...] }
-export async function fetchAntarcticaPoints() {
-  const res = await fetch(`${API_BASE}/antarctica-points`);
-  if (!res.ok) {
-    throw new Error('Failed to load Antarctica points');
-  }
+  // Returns the full Open-Meteo response object
   return res.json();
 }
 
-// ---- USER NOTES (FULL CRUD) ----
-//
-// Model (from backend):
-// { id: number, date: "YYYY-MM-DD", value: number, summary: string }
+/**
+ * Fetch Antarctica heat map points.
+ * Backend returns either:
+ *   [{ nx, ny, value }, ...]
+ * or:
+ *   { points: [{ nx, ny, value }, ...], note: string }
+ */
+export async function fetchAntarcticaPoints() {
+  const res = await fetch(`${API_BASE}/antarctica-points`);
+
+  if (!res.ok) {
+    throw new Error('Failed to load Antarctica points');
+  }
+
+  return res.json();
+}
+
+/**
+ * NOTES CRUD
+ *
+ * Note model (from backend):
+ * {
+ *   id: number,
+ *   date: "YYYY-MM-DD",
+ *   value: number,
+ *   summary: string
+ * }
+ */
 
 export async function fetchNotes() {
   const res = await fetch(`${API_BASE}/notes`);
+
   if (!res.ok) {
     throw new Error('Notes API error');
   }
+
   return res.json();
 }
 
@@ -58,9 +77,11 @@ export async function createNote(payload) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+
   if (!res.ok) {
     throw new Error('Failed to create note');
   }
+
   return res.json();
 }
 
@@ -70,9 +91,11 @@ export async function updateNote(id, payload) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+
   if (!res.ok) {
     throw new Error('Failed to update note');
   }
+
   return res.json();
 }
 
@@ -80,17 +103,20 @@ export async function deleteNote(id) {
   const res = await fetch(`${API_BASE}/notes/${id}`, {
     method: 'DELETE',
   });
+
   if (!res.ok) {
     throw new Error('Failed to delete note');
   }
+
   return res.json();
 }
 
-// ---- TRENDS (USED BY GAME CORE) ----
-//
-// This restores the 'trends' export that gameCore.js imports.
-// If gameCore expects different field names, we can tweak them,
-// but this gives it a structured array to work with.
+/**
+ * TRENDS (used by gameCore.js)
+ *
+ * This restores the `trends` export that the game imports.
+ * Adjust field names if your game expects something different.
+ */
 export const trends = [
   {
     id: 1,
