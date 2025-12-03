@@ -80,8 +80,8 @@ export const Homepage = () => {
 
       <MaxWidth>
         {/* Data Section */}
+        <h2 className='data-subheader'>Data</h2>
         <section className="homepage__data">
-          <h2 className="subheader-need-padding">Data</h2>
 
           <div className="homepage__data-layout">
             {/* Left side: explanation + stat cards */}
